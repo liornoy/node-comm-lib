@@ -3,12 +3,15 @@ package commatrix
 import (
 	"context"
 	"fmt"
+	"os"
 	"strings"
+	"text/tabwriter"
+
+	discoveryv1 "k8s.io/api/discovery/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/liornoy/main/node-comm-lib/pkg/client"
 	"github.com/liornoy/main/node-comm-lib/pkg/consts"
-	discoveryv1 "k8s.io/api/discovery/v1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type CommMatrix struct {
@@ -23,10 +26,25 @@ type CommDetails struct {
 	ServiceName string `json:"serviceName"`
 }
 
+func (cd CommDetails) String() string {
+	return fmt.Sprintf("%s\t\t\t%s\t\t\t%s\t\t\t%s\t\t\t%s", cd.Direction, cd.NodeRole, cd.Protocol, cd.Port, cd.ServiceName)
+}
+
+func (m CommMatrix) PrintMat() {
+	w := new(tabwriter.Writer)
+	w.Init(os.Stdout, 8, 8, 0, '\t', 0)
+	defer w.Flush()
+	fmt.Fprintf(w, " %s\t\t%s\t\t%s\t\t%s\t\t%s\n", "DIRECTION", "NODE-ROLE", "PROTOCOL", "PORT", "SERVICE")
+
+	for i, cd := range m.Matrix {
+		fmt.Fprintf(w, "%d. %s\n", i+1, cd)
+	}
+}
+
 func CreateCommMatrix(cs *client.ClientSet, slices []discoveryv1.EndpointSlice) (CommMatrix, error) {
 	res := make([]CommDetails, 0)
 
-	nodesRoles, err := getNodesRoles(cs)
+	nodesRoles, err := GetNodesRoles(cs)
 	if err != nil {
 		return CommMatrix{}, err
 	}
@@ -53,11 +71,26 @@ func CreateCommMatrix(cs *client.ClientSet, slices []discoveryv1.EndpointSlice) 
 			res = append(res, *commDetails)
 		}
 	}
+	res = RemoveDups(res)
 
 	return CommMatrix{Matrix: res}, nil
 }
 
-func getNodesRoles(cs *client.ClientSet) (map[string]string, error) {
+func RemoveDups(outPuts []CommDetails) []CommDetails {
+	allKeys := make(map[string]bool)
+	res := []CommDetails{}
+	for _, item := range outPuts {
+		str := fmt.Sprintf("%s-%s-%s", item.NodeRole, item.Port, item.Protocol)
+		if _, value := allKeys[str]; !value {
+			allKeys[str] = true
+			res = append(res, item)
+		}
+	}
+
+	return res
+}
+
+func GetNodesRoles(cs *client.ClientSet) (map[string]string, error) {
 	res := make(map[string]string)
 	nodes, err := cs.Nodes().List(context.TODO(), v1.ListOptions{})
 	if err != nil {

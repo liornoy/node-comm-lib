@@ -66,21 +66,7 @@ func GetIngressCommSlices(cs *client.ClientSet) ([]discoveryv1.EndpointSlice, er
 	}
 	res = append(res, withIngressService...)
 
-	res = removeDup(res)
 	return res, nil
-}
-
-func removeDup(slices []discoveryv1.EndpointSlice) []discoveryv1.EndpointSlice {
-	allKeys := make(map[string]bool)
-	res := []discoveryv1.EndpointSlice{}
-	for _, item := range slices {
-		if _, value := allKeys[item.Name]; !value {
-			allKeys[item.Name] = true
-			res = append(res, item)
-		}
-	}
-
-	return res
 }
 
 // withHostNetwrok filters slices that belongs to host-networked pods
