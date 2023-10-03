@@ -7,8 +7,9 @@ import (
 	"strings"
 	"text/tabwriter"
 
+	corev1 "k8s.io/api/core/v1"
 	discoveryv1 "k8s.io/api/discovery/v1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/liornoy/main/node-comm-lib/pkg/client"
 	"github.com/liornoy/main/node-comm-lib/pkg/consts"
@@ -42,31 +43,33 @@ func (m CommMatrix) PrintMat() {
 }
 
 func CreateCommMatrix(cs *client.ClientSet, slices []discoveryv1.EndpointSlice) (CommMatrix, error) {
-	res := make([]CommDetails, 0)
+	if len(slices) == 0 {
+		return CommMatrix{}, fmt.Errorf("slices is empty")
+	}
 
-	nodesRoles, err := GetNodesRoles(cs)
+	nodes, err := cs.Nodes().List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return CommMatrix{}, err
 	}
 
+	nodesRoles := GetNodesRoles(nodes)
+	res := make([]CommDetails, 0)
+
 	for _, slice := range slices {
 		ports := make([]string, 0)
 		protocols := make([]string, 0)
-		services := make([]string, 0)
 		for _, p := range slice.Ports {
 			ports = append(ports, fmt.Sprint(*p.Port))
 			protocols = append(protocols, fmt.Sprint(*p.Protocol))
 		}
-		for _, ownerRed := range slice.OwnerReferences {
-			services = append(services, ownerRed.Name)
-		}
+		services := slice.Labels["kubernetes.io/service-name"]
 		for _, endpoint := range slice.Endpoints {
 			commDetails := &CommDetails{
 				Direction:   "ingress",
 				Protocol:    strings.Join(protocols, ","),
 				Port:        strings.Join(ports, ","),
 				NodeRole:    nodesRoles[*endpoint.NodeName],
-				ServiceName: strings.Join(services, ","),
+				ServiceName: services,
 			}
 			res = append(res, *commDetails)
 		}
@@ -90,12 +93,8 @@ func RemoveDups(outPuts []CommDetails) []CommDetails {
 	return res
 }
 
-func GetNodesRoles(cs *client.ClientSet) (map[string]string, error) {
+func GetNodesRoles(nodes *corev1.NodeList) map[string]string {
 	res := make(map[string]string)
-	nodes, err := cs.Nodes().List(context.TODO(), v1.ListOptions{})
-	if err != nil {
-		return nil, err
-	}
 
 	for _, node := range nodes.Items {
 		_, isWorker := node.Labels[consts.WorkerRole]
@@ -112,5 +111,5 @@ func GetNodesRoles(cs *client.ClientSet) (map[string]string, error) {
 		}
 	}
 
-	return res, nil
+	return res
 }
