@@ -1,0 +1,164 @@
+[
+    {
+        "protocol":    "TCP",
+        "port":        "43573",
+        "nodeRole":    "worker",
+        "serviceName": "rpc.statd"
+    },
+    {
+        "protocol":    "TCP",
+        "port":        "9107",
+        "nodeRole":    "worker",
+        "serviceName": "ovnkube"
+    },
+    {
+        "protocol":    "TCP",
+        "port":        "10010",
+        "nodeRole":    "worker",
+        "serviceName": "crio"
+    },
+    {
+        "protocol":    "TCP",
+        "port":        "10250",
+        "nodeRole":    "worker",
+        "serviceName": "kubelet"
+    },
+    {
+        "protocol":    "TCP",
+        "port":        "9642",
+        "nodeRole":    "worker",
+        "serviceName": "ovsdb-server"
+    },
+    {
+        "protocol":    "TCP",
+        "port":        "9641",
+        "nodeRole":    "worker",
+        "serviceName": "ovsdb-server"
+    },
+    {
+        "protocol":    "TCP",
+        "port":        "22",
+        "nodeRole":    "worker",
+        "serviceName": "sshd"
+    },
+    {
+        "protocol":    "TCP",
+        "port":        "111",
+        "nodeRole":    "worker",
+        "serviceName": "rpcbind"
+    },
+    {
+        "protocol":    "TCP",
+        "port":        "111",
+        "nodeRole":    "worker",
+        "serviceName": "systemd"
+    },
+    {
+        "protocol":    "TCP",
+        "port":        "53249",
+        "nodeRole":    "worker",
+        "serviceName": "rpc.statd"
+    },
+    {
+        "protocol":    "TCP",
+        "port":        "9537",
+        "nodeRole":    "worker",
+        "serviceName": "crio"
+    },
+    {
+        "protocol":    "TCP",
+        "port":        "10256",
+        "nodeRole":    "worker",
+        "serviceName": "ovnkube"
+    },
+    {
+        "protocol":    "TCP",
+        "port":        "53",
+        "nodeRole":    "worker",
+        "serviceName": "coredns"
+    },
+    {
+        "protocol":    "TCP",
+        "port":        "18080",
+        "nodeRole":    "worker",
+        "serviceName": "coredns"
+    },
+    {
+        "protocol":    "UDP",
+        "port":        "68",
+        "nodeRole":    "worker",
+        "serviceName": "NetworkManager"
+    },
+    {
+        "protocol":    "TCP",
+        "port":        "10010",
+        "nodeRole":    "master",
+        "serviceName": "crio"
+    },
+    {
+        "protocol":    "TCP",
+        "port":        "10250",
+        "nodeRole":    "master",
+        "serviceName": "kubelet"
+    },
+    {
+        "protocol":    "TCP",
+        "port":        "9641",
+        "nodeRole":    "master",
+        "serviceName": "ovsdb-server"
+    },
+    {
+        "protocol":    "TCP",
+        "port":        "9642",
+        "nodeRole":    "master",
+        "serviceName": "ovsdb-server"
+    },
+    {
+        "protocol":    "TCP",
+        "port":        "45559",
+        "nodeRole":    "master",
+        "serviceName": "rpc.statd"
+    },
+    {
+        "protocol":    "TCP",
+        "port":        "111",
+        "nodeRole":    "master",
+        "serviceName": "rpcbind"
+    },
+    {
+        "protocol":    "TCP",
+        "port":        "111",
+        "nodeRole":    "master",
+        "serviceName": "systemd"
+    },
+    {
+        "protocol":    "TCP",
+        "port":        "22",
+        "nodeRole":    "master",
+        "serviceName": "sshd"
+    },
+    {
+        "protocol":    "TCP",
+        "port":        "9107",
+        "nodeRole":    "master",
+        "serviceName": "ovnkube"
+    },
+    {
+        "protocol":    "TCP",
+        "port":        "10357",
+        "nodeRole":    "master",
+        "serviceName": "cluster-policy"
+    },
+    {
+        "protocol":    "TCP",
+        "port":        "10256",
+        "nodeRole":    "master",
+        "serviceName": "ovnkube"
+    },
+    {
+        "protocol":    "TCP",
+        "port":        "9191",
+        "nodeRole":    "master",
+        "serviceName": "machine-approve"
+    }
+]
