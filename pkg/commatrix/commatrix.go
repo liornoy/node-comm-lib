@@ -25,17 +25,18 @@ type CommDetails struct {
 	Port        string `json:"port"`
 	NodeRole    string `json:"nodeRole"`
 	ServiceName string `json:"serviceName"`
+	Optional    string `json:"optional"`
 }
 
 func (cd CommDetails) String() string {
-	return fmt.Sprintf("%s\t\t\t%s\t\t\t%s\t\t\t%s\t\t\t%s", cd.Direction, cd.NodeRole, cd.Protocol, cd.Port, cd.ServiceName)
+	return fmt.Sprintf("%s\t\t\t%s\t\t\t%s\t\t\t%s\t\t\t%s\t\t\t%s", cd.Direction, cd.NodeRole, cd.Protocol, cd.Port, cd.ServiceName, cd.Optional)
 }
 
 func (m CommMatrix) PrintMat() {
 	w := new(tabwriter.Writer)
-	w.Init(os.Stdout, 8, 8, 0, '\t', 0)
+	w.Init(os.Stdout, 12, 12, 0, '\t', 0)
 	defer w.Flush()
-	fmt.Fprintf(w, " %s\t\t%s\t\t%s\t\t%s\t\t%s\n", "DIRECTION", "NODE-ROLE", "PROTOCOL", "PORT", "SERVICE")
+	fmt.Fprintf(w, " %s\t\t\t%s\t\t\t%s\t\t\t%s\t\t\t%s\t\t\t%s\n", "DIRECTION", "NODE-ROLE", "PROTOCOL", "PORT", "SERVICE", "OPTIONAL")
 
 	for i, cd := range m.Matrix {
 		fmt.Fprintf(w, "%d. %s\n", i+1, cd)
@@ -56,6 +57,10 @@ func CreateCommMatrix(cs *client.ClientSet, slices []discoveryv1.EndpointSlice) 
 	res := make([]CommDetails, 0)
 
 	for _, slice := range slices {
+		var optional string
+		if _, ok := slice.Labels["optional"]; ok {
+			optional = "true"
+		}
 		ports := make([]string, 0)
 		protocols := make([]string, 0)
 		for _, p := range slice.Ports {
@@ -70,6 +75,7 @@ func CreateCommMatrix(cs *client.ClientSet, slices []discoveryv1.EndpointSlice) 
 				Port:        strings.Join(ports, ","),
 				NodeRole:    nodesRoles[*endpoint.NodeName],
 				ServiceName: services,
+				Optional:    optional,
 			}
 			res = append(res, *commDetails)
 		}
