@@ -114,7 +114,10 @@ func createHostServiceSlices(cs *client.ClientSet) error {
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      name,
 				Namespace: "default",
-				Labels:    map[string]string{"ingress": "", "kubernetes.io/service-name": s.ServiceName},
+				Labels: map[string]string{"ingress": "",
+					"kubernetes.io/service-name":             s.ServiceName,
+					"endpointslice.kubernetes.io/managed-by": "com-matrix-operator",
+				},
 			},
 			Ports: []discoveryv1.EndpointPort{
 				{
