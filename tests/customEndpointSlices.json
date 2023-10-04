@@ -3,7 +3,8 @@
         "protocol":    "TCP",
         "port":        "43573",
         "nodeRole":    "worker",
-        "serviceName": "rpc.statd"
+        "serviceName": "rpc.statd",
+        "optional": "true"
     },
     {
         "protocol":    "TCP",
@@ -39,13 +40,15 @@
         "protocol":    "TCP",
         "port":        "22",
         "nodeRole":    "worker",
-        "serviceName": "sshd"
+        "serviceName": "sshd",
+        "optional": "true"
     },
     {
         "protocol":    "TCP",
         "port":        "111",
         "nodeRole":    "worker",
-        "serviceName": "rpcbind"
+        "serviceName": "rpcbind",
+        "optional": "true"
     },
     {
         "protocol":    "TCP",
@@ -57,7 +60,8 @@
         "protocol":    "TCP",
         "port":        "53249",
         "nodeRole":    "worker",
-        "serviceName": "rpc.statd"
+        "serviceName": "rpc.statd",
+        "optional": "true"
     },
     {
         "protocol":    "TCP",
@@ -117,13 +121,15 @@
         "protocol":    "TCP",
         "port":        "45559",
         "nodeRole":    "master",
-        "serviceName": "rpc.statd"
+        "serviceName": "rpc.statd",
+        "optional": "true"
     },
     {
         "protocol":    "TCP",
         "port":        "111",
         "nodeRole":    "master",
-        "serviceName": "rpcbind"
+        "serviceName": "rpcbind",
+        "optional": "true"
     },
     {
         "protocol":    "TCP",
@@ -135,7 +141,8 @@
         "protocol":    "TCP",
         "port":        "22",
         "nodeRole":    "master",
-        "serviceName": "sshd"
+        "serviceName": "sshd",
+        "optional": "true"
     },
     {
         "protocol":    "TCP",

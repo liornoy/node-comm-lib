@@ -133,6 +133,10 @@ func createHostServiceSlices(cs *client.ClientSet) error {
 			},
 			AddressType: "IPv4",
 		}
+		if s.Optional == "true" {
+			endpointSlice.Labels["optional"] = "true"
+		}
+
 		_, err = cs.EndpointSlices("default").Create(context.TODO(), &endpointSlice, metav1.CreateOptions{})
 		if err != nil && !errors.IsAlreadyExists(err) {
 			return err
