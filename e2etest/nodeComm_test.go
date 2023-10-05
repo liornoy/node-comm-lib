@@ -70,9 +70,7 @@ var _ = Describe("Comm Matrix", func() {
 			printComMat(clusterComMat)
 			outfile.Close()
 
-			var allNamespaces string
-
-			epSliceQuery, err := endpointslices.NewQuery(cs, allNamespaces)
+			epSliceQuery, err := endpointslices.NewQuery(cs)
 			Expect(err).ToNot(HaveOccurred())
 
 			ingerssSlices := epSliceQuery.
