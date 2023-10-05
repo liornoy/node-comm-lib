@@ -1,4 +1,4 @@
-package nodecommlib
+package e2etest
 
 import (
 	"testing"
