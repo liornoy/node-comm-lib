@@ -1,7 +1,9 @@
 package commatrix
 
 import (
+	"bytes"
 	"context"
+	"encoding/csv"
 	"fmt"
 	"os"
 	"strings"
@@ -25,18 +27,18 @@ type CommDetails struct {
 	Port        string `json:"port"`
 	NodeRole    string `json:"nodeRole"`
 	ServiceName string `json:"serviceName"`
-	Optional    string `json:"optional"`
+	Required    string `json:"required"`
 }
 
 func (cd CommDetails) String() string {
-	return fmt.Sprintf("%s\t\t\t%s\t\t\t%s\t\t\t%s\t\t\t%s\t\t\t%s", cd.Direction, cd.NodeRole, cd.Protocol, cd.Port, cd.ServiceName, cd.Optional)
+	return fmt.Sprintf("%s,%s,%s,%s,%s,%s", cd.Direction, cd.Protocol, cd.Port, cd.NodeRole, cd.ServiceName, cd.Required)
 }
 
 func (m CommMatrix) PrintMat() {
 	w := new(tabwriter.Writer)
 	w.Init(os.Stdout, 12, 12, 0, '\t', 0)
 	defer w.Flush()
-	fmt.Fprintf(w, " %s\t\t\t%s\t\t\t%s\t\t\t%s\t\t\t%s\t\t\t%s\n", "DIRECTION", "NODE-ROLE", "PROTOCOL", "PORT", "SERVICE", "OPTIONAL")
+	fmt.Fprintf(w, " %s\t\t\t%s\t\t\t%s\t\t\t%s\t\t\t%s\t\t\t%s\n", "DIRECTION", "NODE-ROLE", "PROTOCOL", "PORT", "SERVICE", "REQUIRED")
 
 	for i, cd := range m.Matrix {
 		fmt.Fprintf(w, "%d. %s\n", i+1, cd)
@@ -57,9 +59,9 @@ func CreateCommMatrix(cs *client.ClientSet, slices []discoveryv1.EndpointSlice) 
 	res := make([]CommDetails, 0)
 
 	for _, slice := range slices {
-		var optional string
+		required := "true"
 		if _, ok := slice.Labels["optional"]; ok {
-			optional = "true"
+			required = "false"
 		}
 		ports := make([]string, 0)
 		protocols := make([]string, 0)
@@ -75,7 +77,7 @@ func CreateCommMatrix(cs *client.ClientSet, slices []discoveryv1.EndpointSlice) 
 				Port:        strings.Join(ports, ","),
 				NodeRole:    nodesRoles[*endpoint.NodeName],
 				ServiceName: services,
-				Optional:    optional,
+				Required:    required,
 			}
 			res = append(res, *commDetails)
 		}
@@ -83,6 +85,23 @@ func CreateCommMatrix(cs *client.ClientSet, slices []discoveryv1.EndpointSlice) 
 	res = RemoveDups(res)
 
 	return CommMatrix{Matrix: res}, nil
+}
+
+func (m CommMatrix) ToCSV() ([]byte, error) {
+	out := make([]byte, 0)
+	w := bytes.NewBuffer(out)
+	csvwriter := csv.NewWriter(w)
+
+	for _, cd := range m.Matrix {
+		record := strings.Split(cd.String(), ",")
+		err := csvwriter.Write(record)
+		if err != nil {
+			return nil, err
+		}
+	}
+	csvwriter.Flush()
+
+	return w.Bytes(), nil
 }
 
 func RemoveDups(outPuts []CommDetails) []CommDetails {

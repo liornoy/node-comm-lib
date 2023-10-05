@@ -4,7 +4,7 @@
         "port":        "43573",
         "nodeRole":    "worker",
         "serviceName": "rpc.statd",
-        "optional": "true"
+        "required": "false"
     },
     {
         "protocol":    "TCP",
@@ -41,14 +41,14 @@
         "port":        "22",
         "nodeRole":    "worker",
         "serviceName": "sshd",
-        "optional": "true"
+        "required": "false"
     },
     {
         "protocol":    "TCP",
         "port":        "111",
         "nodeRole":    "worker",
         "serviceName": "rpcbind",
-        "optional": "true"
+        "required": "false"
     },
     {
         "protocol":    "TCP",
@@ -61,7 +61,7 @@
         "port":        "53249",
         "nodeRole":    "worker",
         "serviceName": "rpc.statd",
-        "optional": "true"
+        "required": "false"
     },
     {
         "protocol":    "TCP",
@@ -122,14 +122,14 @@
         "port":        "45559",
         "nodeRole":    "master",
         "serviceName": "rpc.statd",
-        "optional": "true"
+        "required": "false"
     },
     {
         "protocol":    "TCP",
         "port":        "111",
         "nodeRole":    "master",
         "serviceName": "rpcbind",
-        "optional": "true"
+        "required": "false"
     },
     {
         "protocol":    "TCP",
@@ -142,7 +142,7 @@
         "port":        "22",
         "nodeRole":    "master",
         "serviceName": "sshd",
-        "optional": "true"
+        "required": "false"
     },
     {
         "protocol":    "TCP",
@@ -167,5 +167,31 @@
         "port":        "9191",
         "nodeRole":    "master",
         "serviceName": "machine-approve"
+    },
+    {
+        "protocol":    "TCP",
+        "port":        "42863",
+        "nodeRole":    "master",
+        "serviceName": "rpc.statd",
+        "required": "false"
+    },
+    {
+        "protocol":    "TCP",
+        "port":        "39937",
+        "nodeRole":    "master",
+        "serviceName": "rpc.statd",
+        "required": "false"
+    },
+    {
+        "protocol":    "TCP",
+        "port":        "60000",
+        "nodeRole":    "master",
+        "serviceName": "crio"
+    },
+    {
+        "protocol":    "TCP",
+        "port":        "9447",
+        "nodeRole":    "master",
+        "serviceName": "crio"
     }
 ]
