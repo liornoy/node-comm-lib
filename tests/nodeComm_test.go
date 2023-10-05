@@ -133,7 +133,7 @@ func createHostServiceSlices(cs *client.ClientSet) error {
 			},
 			AddressType: "IPv4",
 		}
-		if s.Optional == "true" {
+		if s.Required == "false" {
 			endpointSlice.Labels["optional"] = "true"
 		}
 

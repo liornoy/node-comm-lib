@@ -6,6 +6,6 @@ PODS=$(oc get pods -n openshift-machine-config-operator -o name | grep machine-c
 
 for POD in ${PODS}; do
     NODE=$(oc get "${POD}" -n openshift-machine-config-operator -o 'jsonpath={.spec.nodeName}')
-    oc exec -it "${POD}" -n openshift-machine-config-operator -- ss -plant > ./artifacts/"${NODE}"-tcp.txt
-    oc exec -it "${POD}" -n openshift-machine-config-operator -- ss -planu > ./artifacts/"${NODE}"-udp.txt
+    oc exec "${POD}" -n openshift-machine-config-operator -c machine-config-daemon -- ss -plant > ./artifacts/"${NODE}"-tcp.txt
+    oc exec "${POD}" -n openshift-machine-config-operator -c machine-config-daemon -- ss -planu > ./artifacts/"${NODE}"-udp.txt
 done
