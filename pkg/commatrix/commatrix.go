@@ -5,9 +5,7 @@ import (
 	"context"
 	"encoding/csv"
 	"fmt"
-	"os"
 	"strings"
-	"text/tabwriter"
 
 	corev1 "k8s.io/api/core/v1"
 	discoveryv1 "k8s.io/api/discovery/v1"
@@ -34,43 +32,32 @@ func (cd ComDetails) String() string {
 	return fmt.Sprintf("%s,%s,%s,%s,%s,%s", cd.Direction, cd.Protocol, cd.Port, cd.NodeRole, cd.ServiceName, cd.Required)
 }
 
-func (m ComMatrix) PrintMat() {
-	w := new(tabwriter.Writer)
-	w.Init(os.Stdout, 12, 12, 0, '\t', 0)
-	defer w.Flush()
-	fmt.Fprintf(w, " %s\t\t\t%s\t\t\t%s\t\t\t%s\t\t\t%s\t\t\t%s\n", "DIRECTION", "NODE-ROLE", "PROTOCOL", "PORT", "SERVICE", "REQUIRED")
-
-	for i, cd := range m.Matrix {
-		fmt.Fprintf(w, "%d. %s\n", i+1, cd)
-	}
-}
-
-func CreateComMatrix(cs *client.ClientSet, slices []discoveryv1.EndpointSlice) (ComMatrix, error) {
-	if len(slices) == 0 {
-		return ComMatrix{}, fmt.Errorf("slices is empty")
+func CreateComMatrix(cs *client.ClientSet, epSlices []discoveryv1.EndpointSlice) (ComMatrix, error) {
+	if len(epSlices) == 0 {
+		return ComMatrix{}, fmt.Errorf("failed to create ComMatrix: epSlices is empty")
 	}
 
 	nodes, err := cs.Nodes().List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
-		return ComMatrix{}, err
+		return ComMatrix{}, fmt.Errorf("failed to create ComMatrix: %w", err)
 	}
 
 	nodesRoles := GetNodesRoles(nodes)
 	res := make([]ComDetails, 0)
 
-	for _, slice := range slices {
+	for _, epSlice := range epSlices {
 		required := "true"
-		if _, ok := slice.Labels["optional"]; ok {
+		if _, ok := epSlice.Labels["optional"]; ok {
 			required = "false"
 		}
 		ports := make([]string, 0)
 		protocols := make([]string, 0)
-		for _, p := range slice.Ports {
+		for _, p := range epSlice.Ports {
 			ports = append(ports, fmt.Sprint(*p.Port))
 			protocols = append(protocols, fmt.Sprint(*p.Protocol))
 		}
-		services := slice.Labels["kubernetes.io/service-name"]
-		for _, endpoint := range slice.Endpoints {
+		services := epSlice.Labels["kubernetes.io/service-name"]
+		for _, endpoint := range epSlice.Endpoints {
 			comDetails := &ComDetails{
 				Direction:   "ingress",
 				Protocol:    strings.Join(protocols, ","),
@@ -96,7 +83,7 @@ func (m ComMatrix) ToCSV() ([]byte, error) {
 		record := strings.Split(cd.String(), ",")
 		err := csvwriter.Write(record)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to convert to CSV foramt: %w", err)
 		}
 	}
 	csvwriter.Flush()
