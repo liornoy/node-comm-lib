@@ -1,130 +1,172 @@
 package endpointslices
 
 import (
+	"context"
 	"fmt"
 
-	"context"
-	"log"
-
 	corev1 "k8s.io/api/core/v1"
-	v1 "k8s.io/api/core/v1"
 	discoveryv1 "k8s.io/api/discovery/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	client "github.com/liornoy/main/node-comm-lib/pkg/client"
-	"github.com/liornoy/main/node-comm-lib/pkg/consts"
 )
 
-func forPod(pod corev1.Pod, slices []discoveryv1.EndpointSlice) (discoveryv1.EndpointSlice, error) {
-	for _, slice := range slices {
-		for _, endpoint := range slice.Endpoints {
-			if endpoint.TargetRef == nil {
-				continue
-			}
-			if endpoint.TargetRef.Name == pod.Name &&
-				endpoint.TargetRef.Namespace == pod.Namespace {
-				return slice, nil
-			}
+type QueryBuilder interface {
+	Query() []discoveryv1.EndpointSlice
+	WithLabels(labels map[string]string) QueryBuilder
+	WithHostNetwork() QueryBuilder
+	WithServiceType(serviceType corev1.ServiceType) QueryBuilder
+}
+
+type QueryParams struct {
+	cs       *client.ClientSet
+	pods     []corev1.Pod
+	filter   []bool
+	epSlices []discoveryv1.EndpointSlice
+	services []corev1.Service
+}
+
+func NewQuery(cs *client.ClientSet, namespace string) (*QueryParams, error) {
+	if cs == nil {
+		return nil, fmt.Errorf("failed to create QueryParams: clientset is nil")
+	}
+
+	epSlicesList, err := cs.DiscoveryV1Interface.EndpointSlices(namespace).List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("failed to create QueryParams: %w", err)
+	}
+
+	servicesList, err := cs.CoreV1Interface.Services(namespace).List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("failed to create QueryParams: %w", err)
+	}
+
+	podsList, err := cs.CoreV1Interface.Pods(namespace).List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("failed to create QueryParams: %w", err)
+	}
+
+	ret := QueryParams{
+		cs:       cs,
+		epSlices: epSlicesList.Items,
+		services: servicesList.Items,
+		pods:     podsList.Items,
+		filter:   make([]bool, len(epSlicesList.Items))}
+
+	return &ret, nil
+}
+
+func (q *QueryParams) Query() []discoveryv1.EndpointSlice {
+	ret := make([]discoveryv1.EndpointSlice, 0)
+
+	for i, filter := range q.filter {
+		if filter {
+			ret = append(ret, q.epSlices[i])
 		}
 	}
 
-	return discoveryv1.EndpointSlice{}, fmt.Errorf("failed to find the EndpointSlice for host-networked pod: %s", pod.Name)
+	return ret
 }
 
-func forService(service corev1.Service, slices []discoveryv1.EndpointSlice) (discoveryv1.EndpointSlice, error) {
-	for _, slice := range slices {
-		for _, ownerRef := range slice.OwnerReferences {
-			if ownerRef.Name == service.Name {
-			}
-			return slice, nil
+func (q *QueryParams) WithLabels(labels map[string]string) QueryBuilder {
+	for i, epSlice := range q.epSlices {
+		if q.withLabels(epSlice, labels) {
+			q.filter[i] = true
 		}
 	}
 
-	return discoveryv1.EndpointSlice{}, fmt.Errorf("failed to find the EndpointSlice for service: %s", service.Name)
+	return q
 }
 
-// GetIngressCommSlices reutrn the EndpointSlices in the cluster that are for ingress traffic.
-func GetIngressCommSlices(cs *client.ClientSet) ([]discoveryv1.EndpointSlice, error) {
-	res := make([]discoveryv1.EndpointSlice, 0)
-	slices, err := cs.DiscoveryV1Interface.EndpointSlices("").List(context.TODO(), metav1.ListOptions{})
-	if err != nil {
-		return nil, err
+func (q *QueryParams) WithHostNetwork() QueryBuilder {
+	for i, epSlice := range q.epSlices {
+		if q.withHostNetworked(epSlice) {
+			q.filter[i] = true
+		}
 	}
 
-	withHostNetwork, err := withHostNetwork(cs, slices.Items)
-	if err != nil {
-		return nil, err
-	}
-	res = append(res, withHostNetwork...)
-
-	withIngressLabel := withIngressLabel(cs, slices.Items)
-	res = append(res, withIngressLabel...)
-
-	withIngressService, err := withIngressService(cs, slices.Items)
-	if err != nil {
-		return nil, err
-	}
-	res = append(res, withIngressService...)
-
-	return res, nil
+	return q
 }
 
-// withHostNetwrok filters slices that belongs to host-networked pods
-func withHostNetwork(cs *client.ClientSet, slices []discoveryv1.EndpointSlice) ([]discoveryv1.EndpointSlice, error) {
-	res := make([]discoveryv1.EndpointSlice, 0)
-	pods, err := cs.CoreV1Interface.Pods("").List(context.TODO(), metav1.ListOptions{})
-	if err != nil {
-		return nil, err
+func (q *QueryParams) WithServiceType(serviceType corev1.ServiceType) QueryBuilder {
+	for i, epSlice := range q.epSlices {
+		if q.withServiceType(epSlice, serviceType) {
+			q.filter[i] = true
+		}
 	}
 
-	for _, pod := range pods.Items {
-		if pod.Spec.HostNetwork == false {
+	return q
+}
+
+func (q *QueryParams) withLabels(epSlice discoveryv1.EndpointSlice, labels map[string]string) bool {
+	for key, value := range labels {
+		if mValue, ok := epSlice.Labels[key]; !ok || mValue != value {
+			return false
+		}
+	}
+
+	return true
+}
+
+func (q *QueryParams) withServiceType(epSlice discoveryv1.EndpointSlice, serviceType corev1.ServiceType) bool {
+	if len(epSlice.OwnerReferences) == 0 {
+		return false
+	}
+
+	for _, ownerRef := range epSlice.OwnerReferences {
+		name := ownerRef.Name
+		namespace := epSlice.Namespace
+		service := getService(name, namespace, q.services)
+		if service == nil {
 			continue
 		}
-		slice, err := forPod(pod, slices)
-		if err != nil {
-			// log the error
-			log.Print(err)
-			continue
+		if service.Spec.Type == serviceType {
+			return true
 		}
-		res = append(res, slice)
 	}
 
-	return res, nil
+	return false
 }
 
-// withIngressLabel filters slices that belong to the host (filtered via label=ingress)
-func withIngressLabel(cs *client.ClientSet, slices []discoveryv1.EndpointSlice) []discoveryv1.EndpointSlice {
-	res := make([]discoveryv1.EndpointSlice, 0)
-	for _, slice := range slices {
-		if _, ok := slice.Labels[consts.IngressLabel]; ok {
-			res = append(res, slice)
-		}
+func (q *QueryParams) withHostNetworked(epSlice discoveryv1.EndpointSlice) bool {
+	if len(epSlice.Endpoints) == 0 {
+		return false
 	}
 
-	return res
-}
-
-// withIngressService filters slices of services with type NodePort|LoadBalancer
-func withIngressService(cs *client.ClientSet, slices []discoveryv1.EndpointSlice) ([]discoveryv1.EndpointSlice, error) {
-	res := make([]discoveryv1.EndpointSlice, 0)
-	services, err := cs.CoreV1Interface.Services("").List(context.TODO(), metav1.ListOptions{})
-	if err != nil {
-		return nil, err
-	}
-
-	for _, service := range services.Items {
-		if service.Spec.Type != v1.ServiceTypeNodePort &&
-			service.Spec.Type != v1.ServiceTypeLoadBalancer {
+	for _, endpoint := range epSlice.Endpoints {
+		if endpoint.TargetRef == nil {
 			continue
 		}
-
-		slice, err := forService(service, slices)
-		if err != nil {
-			return nil, err
+		name := endpoint.TargetRef.Name
+		namespace := endpoint.TargetRef.Namespace
+		pod := getPod(name, namespace, q.pods)
+		if pod == nil {
+			continue
 		}
-		res = append(res, slice)
+		if pod.Spec.HostNetwork {
+			return true
+		}
 	}
 
-	return res, nil
+	return false
+}
+
+func getPod(name, namespace string, pods []corev1.Pod) *corev1.Pod {
+	for i, p := range pods {
+		if p.Name == name && p.Namespace == namespace {
+			return &pods[i]
+		}
+	}
+
+	return nil
+}
+
+func getService(name, namespace string, services []corev1.Service) *corev1.Service {
+	for i, service := range services {
+		if service.Name == name && service.Namespace == namespace {
+			return &services[i]
+		}
+	}
+
+	return nil
 }
