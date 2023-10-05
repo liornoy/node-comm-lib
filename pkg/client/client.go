@@ -9,7 +9,6 @@ import (
 	discoveryv1client "k8s.io/client-go/kubernetes/typed/discovery/v1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	runtimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -45,7 +44,7 @@ func New(kubeconfig string) (*ClientSet, error) {
 	clientSet.AppsV1Interface = appsv1client.NewForConfigOrDie(config)
 	clientSet.DiscoveryV1Interface = discoveryv1client.NewForConfigOrDie(config)
 
-	clientSet.Client, err = runtimeclient.New(config, client.Options{})
+	clientSet.Client, err = runtimeclient.New(config, runtimeclient.Options{})
 
 	return clientSet, nil
 }
