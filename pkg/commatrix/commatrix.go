@@ -17,11 +17,11 @@ import (
 	"github.com/liornoy/main/node-comm-lib/pkg/consts"
 )
 
-type CommMatrix struct {
-	Matrix []CommDetails
+type ComMatrix struct {
+	Matrix []ComDetails
 }
 
-type CommDetails struct {
+type ComDetails struct {
 	Direction   string `json:"direction"`
 	Protocol    string `json:"protocol"`
 	Port        string `json:"port"`
@@ -30,11 +30,11 @@ type CommDetails struct {
 	Required    string `json:"required"`
 }
 
-func (cd CommDetails) String() string {
+func (cd ComDetails) String() string {
 	return fmt.Sprintf("%s,%s,%s,%s,%s,%s", cd.Direction, cd.Protocol, cd.Port, cd.NodeRole, cd.ServiceName, cd.Required)
 }
 
-func (m CommMatrix) PrintMat() {
+func (m ComMatrix) PrintMat() {
 	w := new(tabwriter.Writer)
 	w.Init(os.Stdout, 12, 12, 0, '\t', 0)
 	defer w.Flush()
@@ -45,18 +45,18 @@ func (m CommMatrix) PrintMat() {
 	}
 }
 
-func CreateCommMatrix(cs *client.ClientSet, slices []discoveryv1.EndpointSlice) (CommMatrix, error) {
+func CreateComMatrix(cs *client.ClientSet, slices []discoveryv1.EndpointSlice) (ComMatrix, error) {
 	if len(slices) == 0 {
-		return CommMatrix{}, fmt.Errorf("slices is empty")
+		return ComMatrix{}, fmt.Errorf("slices is empty")
 	}
 
 	nodes, err := cs.Nodes().List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
-		return CommMatrix{}, err
+		return ComMatrix{}, err
 	}
 
 	nodesRoles := GetNodesRoles(nodes)
-	res := make([]CommDetails, 0)
+	res := make([]ComDetails, 0)
 
 	for _, slice := range slices {
 		required := "true"
@@ -71,7 +71,7 @@ func CreateCommMatrix(cs *client.ClientSet, slices []discoveryv1.EndpointSlice) 
 		}
 		services := slice.Labels["kubernetes.io/service-name"]
 		for _, endpoint := range slice.Endpoints {
-			commDetails := &CommDetails{
+			comDetails := &ComDetails{
 				Direction:   "ingress",
 				Protocol:    strings.Join(protocols, ","),
 				Port:        strings.Join(ports, ","),
@@ -79,15 +79,15 @@ func CreateCommMatrix(cs *client.ClientSet, slices []discoveryv1.EndpointSlice) 
 				ServiceName: services,
 				Required:    required,
 			}
-			res = append(res, *commDetails)
+			res = append(res, *comDetails)
 		}
 	}
 	res = RemoveDups(res)
 
-	return CommMatrix{Matrix: res}, nil
+	return ComMatrix{Matrix: res}, nil
 }
 
-func (m CommMatrix) ToCSV() ([]byte, error) {
+func (m ComMatrix) ToCSV() ([]byte, error) {
 	out := make([]byte, 0)
 	w := bytes.NewBuffer(out)
 	csvwriter := csv.NewWriter(w)
@@ -104,9 +104,9 @@ func (m CommMatrix) ToCSV() ([]byte, error) {
 	return w.Bytes(), nil
 }
 
-func RemoveDups(outPuts []CommDetails) []CommDetails {
+func RemoveDups(outPuts []ComDetails) []ComDetails {
 	allKeys := make(map[string]bool)
-	res := []CommDetails{}
+	res := []ComDetails{}
 	for _, item := range outPuts {
 		str := fmt.Sprintf("%s-%s-%s", item.NodeRole, item.Port, item.Protocol)
 		if _, value := allKeys[str]; !value {

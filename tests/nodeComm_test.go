@@ -72,7 +72,7 @@ var _ = Describe("Comm Matrix", func() {
 			slices, err := endpointslices.GetIngressCommSlices(cs)
 			Expect(err).ToNot(HaveOccurred())
 
-			endpointSliceMat, err := commatrix.CreateCommMatrix(cs, slices)
+			endpointSliceMat, err := commatrix.CreateComMatrix(cs, slices)
 			Expect(err).ToNot(HaveOccurred())
 
 			outfile, err = os.Create("./artifacts/endpointslices-com-matirx.txt")
@@ -154,8 +154,8 @@ func reverseMap(m map[string]string) map[string]string {
 	return n
 }
 
-func customHostServicesDefinition() ([]commatrix.CommDetails, error) {
-	var res []commatrix.CommDetails
+func customHostServicesDefinition() ([]commatrix.ComDetails, error) {
+	var res []commatrix.ComDetails
 	bs, err := os.ReadFile("customEndpointSlices.json")
 	if err != nil {
 		return nil, err
@@ -169,26 +169,26 @@ func customHostServicesDefinition() ([]commatrix.CommDetails, error) {
 	return res, nil
 }
 
-func generateClusterComMatrix(cs *client.ClientSet) (commatrix.CommMatrix, error) {
-	var res = commatrix.CommMatrix{}
+func generateClusterComMatrix(cs *client.ClientSet) (commatrix.ComMatrix, error) {
+	var res = commatrix.ComMatrix{}
 
 	nodes, err := cs.Nodes().List(context.TODO(), metav1.ListOptions{})
 	Expect(err).ToNot(HaveOccurred())
 
 	nodesRoles := commatrix.GetNodesRoles(nodes)
 
-	comDetails := make([]commatrix.CommDetails, 0)
+	comDetails := make([]commatrix.ComDetails, 0)
 	for _, n := range nodes.Items {
 		tcpOutput, err := os.ReadFile("./artifacts/" + n.Name + "-tcp.txt")
 		Expect(err).ToNot(HaveOccurred())
 
-		tcpComDetails := ssToCommDetails(string(tcpOutput), nodesRoles[n.Name], "TCP")
+		tcpComDetails := ssToComDetails(string(tcpOutput), nodesRoles[n.Name], "TCP")
 		comDetails = append(comDetails, tcpComDetails...)
 
 		udpOutput, err := os.ReadFile("./artifacts/" + n.Name + "-udp.txt")
 		Expect(err).ToNot(HaveOccurred())
 
-		udpComDetails := ssToCommDetails(string(udpOutput), nodesRoles[n.Name], "UDP")
+		udpComDetails := ssToComDetails(string(udpOutput), nodesRoles[n.Name], "UDP")
 		comDetails = append(comDetails, udpComDetails...)
 	}
 
@@ -198,8 +198,8 @@ func generateClusterComMatrix(cs *client.ClientSet) (commatrix.CommMatrix, error
 	return res, nil
 }
 
-func ssToCommDetails(ssOutput string, role string, protocol string) []commatrix.CommDetails {
-	res := make([]commatrix.CommDetails, 0)
+func ssToComDetails(ssOutput string, role string, protocol string) []commatrix.ComDetails {
+	res := make([]commatrix.ComDetails, 0)
 
 	reader := strings.NewReader(ssOutput)
 	scanner := bufio.NewScanner(reader)
@@ -229,7 +229,7 @@ func ssToCommDetails(ssOutput string, role string, protocol string) []commatrix.
 		idx := strings.LastIndex(tokens[3], ":")
 		port := tokens[3][idx+1:]
 
-		res = append(res, commatrix.CommDetails{
+		res = append(res, commatrix.ComDetails{
 			Direction:   "ingress",
 			Protocol:    protocol,
 			Port:        port,
