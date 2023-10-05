@@ -1,4 +1,4 @@
-package nodecommlib
+package e2etest
 
 import (
 	"bufio"
@@ -20,6 +20,7 @@ import (
 
 	"github.com/liornoy/main/node-comm-lib/pkg/client"
 	"github.com/liornoy/main/node-comm-lib/pkg/commatrix"
+	"github.com/liornoy/main/node-comm-lib/pkg/consts"
 	"github.com/liornoy/main/node-comm-lib/pkg/endpointslices"
 	"github.com/liornoy/main/node-comm-lib/pkg/pointer"
 )
@@ -39,7 +40,7 @@ var _ = Describe("Comm Matrix", func() {
 		Expect(err).ToNot(HaveOccurred())
 
 		By("fetching all ports cluster is listening to")
-		_, err = exec.Command("./runSSonNodes.sh").Output()
+		_, err = exec.Command("./hack/runSSonNodes.sh").Output()
 		Expect(err).ToNot(HaveOccurred())
 	})
 
@@ -66,25 +67,40 @@ var _ = Describe("Comm Matrix", func() {
 			Expect(err).ToNot(HaveOccurred())
 			stdout := os.Stdout
 			os.Stdout = outfile
-			clusterComMat.PrintMat()
+			printComMat(clusterComMat)
 			outfile.Close()
 
-			slices, err := endpointslices.GetIngressCommSlices(cs)
+			var allNamespaces string
+
+			epSliceQuery, err := endpointslices.NewQuery(cs, allNamespaces)
 			Expect(err).ToNot(HaveOccurred())
 
-			endpointSliceMat, err := commatrix.CreateComMatrix(cs, slices)
+			ingerssSlices := epSliceQuery.
+				WithHostNetwork().
+				WithLabels(map[string]string{consts.IngressLabel: ""}).
+				WithServiceType(corev1.ServiceTypeNodePort).
+				WithServiceType(corev1.ServiceTypeLoadBalancer).
+				Query()
+
+			endpointSliceMat, err := commatrix.CreateComMatrix(cs, ingerssSlices)
 			Expect(err).ToNot(HaveOccurred())
 
 			outfile, err = os.Create("./artifacts/endpointslices-com-matirx.txt")
 			Expect(err).ToNot(HaveOccurred())
 			os.Stdout = outfile
-			endpointSliceMat.PrintMat()
+			printComMat(endpointSliceMat)
 			outfile.Close()
 
 			os.Stdout = stdout
 		})
 	})
 })
+
+func printComMat(comMat commatrix.ComMatrix) {
+	for _, cd := range comMat.Matrix {
+		fmt.Println(cd)
+	}
+}
 
 func createHostServiceSlices(cs *client.ClientSet) error {
 	nodes, err := cs.Nodes().List(context.TODO(), metav1.ListOptions{})
