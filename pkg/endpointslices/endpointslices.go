@@ -6,9 +6,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	discoveryv1 "k8s.io/api/discovery/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	client "github.com/liornoy/main/node-comm-lib/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type QueryBuilder interface {
@@ -19,35 +17,40 @@ type QueryBuilder interface {
 }
 
 type QueryParams struct {
-	cs       *client.ClientSet
+	client.Client
 	pods     []corev1.Pod
 	filter   []bool
 	epSlices []discoveryv1.EndpointSlice
 	services []corev1.Service
 }
 
-func NewQuery(cs *client.ClientSet, namespace string) (*QueryParams, error) {
-	if cs == nil {
-		return nil, fmt.Errorf("failed to create QueryParams: clientset is nil")
+func NewQuery(c client.Client) (*QueryParams, error) {
+	if c == nil {
+		return nil, fmt.Errorf("client is nil")
 	}
 
-	epSlicesList, err := cs.DiscoveryV1Interface.EndpointSlices(namespace).List(context.TODO(), metav1.ListOptions{})
+	var (
+		epSlicesList discoveryv1.EndpointSliceList
+		servicesList corev1.ServiceList
+		podsList     corev1.PodList
+	)
+	err := c.List(context.TODO(), &epSlicesList, &client.ListOptions{})
 	if err != nil {
-		return nil, fmt.Errorf("failed to create QueryParams: %w", err)
+		return nil, fmt.Errorf("failed to list endpointslices: %w", err)
 	}
 
-	servicesList, err := cs.CoreV1Interface.Services(namespace).List(context.TODO(), metav1.ListOptions{})
+	err = c.List(context.TODO(), &servicesList, &client.ListOptions{})
 	if err != nil {
-		return nil, fmt.Errorf("failed to create QueryParams: %w", err)
+		return nil, fmt.Errorf("failed to list services: %w", err)
 	}
 
-	podsList, err := cs.CoreV1Interface.Pods(namespace).List(context.TODO(), metav1.ListOptions{})
+	err = c.List(context.TODO(), &podsList, &client.ListOptions{})
 	if err != nil {
-		return nil, fmt.Errorf("failed to create QueryParams: %w", err)
+		return nil, fmt.Errorf("failed to list pods: %w", err)
 	}
 
 	ret := QueryParams{
-		cs:       cs,
+		Client:   c,
 		epSlices: epSlicesList.Items,
 		services: servicesList.Items,
 		pods:     podsList.Items,
