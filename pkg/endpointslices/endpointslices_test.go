@@ -113,7 +113,6 @@ func TestWithLabels(t *testing.T) {
 		}
 		q = QueryParams{
 			epSlices: epSlices,
-			filter:   make([]bool, len(epSlices)),
 		}
 	)
 
@@ -158,7 +157,7 @@ func TestWithLabels(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		resetFilter(&q)
+		initQueryFilter(&q)
 		res := q.WithLabels(test.labels).Query()
 		if err := isEqual(res, test.expectedEpSlice); err != nil {
 			t.Fatalf("test \"%s\" failed: %s", test.desc, err)
@@ -293,17 +292,16 @@ func TestWithHostNetwork(t *testing.T) {
 				},
 			},
 		}
+		expectedEpSlice = map[string]bool{
+			"with-hostnetwork": true,
+		}
 		q = QueryParams{
 			epSlices: epSlices,
 			pods:     pods,
-			filter:   make([]bool, len(epSlices)),
 		}
 	)
 
-	expectedEpSlice := map[string]bool{
-		"with-hostnetwork": true,
-	}
-
+	initQueryFilter(&q)
 	res := q.WithHostNetwork().Query()
 	if err := isEqual(res, expectedEpSlice); err != nil {
 		t.Fatalf("test \"with-hostnetwork\" failed: %s", err)
@@ -324,7 +322,12 @@ func isEqual(epSlices []discoveryv1.EndpointSlice, expected map[string]bool) err
 	return nil
 }
 
-func resetFilter(q *QueryParams) {
+func initQueryFilter(q *QueryParams) {
+	if q.filter == nil {
+		q.filter = make([]bool, len(q.epSlices))
+		return
+	}
+
 	for i := range q.filter {
 		q.filter[i] = false
 	}
