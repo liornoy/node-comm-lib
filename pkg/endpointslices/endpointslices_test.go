@@ -308,6 +308,104 @@ func TestWithHostNetwork(t *testing.T) {
 	}
 }
 
+func TestWithServiceType(t *testing.T) {
+	var (
+		loadBalancerService = corev1.Service{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "lb-service",
+				Namespace: consts.TestNameSpace,
+			},
+			Spec: corev1.ServiceSpec{
+				Type: corev1.ServiceTypeLoadBalancer,
+			},
+		}
+		nodePortService = corev1.Service{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "node-port-service",
+				Namespace: consts.TestNameSpace,
+			},
+			Spec: corev1.ServiceSpec{
+				Type: corev1.ServiceTypeNodePort,
+			},
+		}
+		services = []corev1.Service{loadBalancerService, nodePortService}
+		epSlices = []discoveryv1.EndpointSlice{
+			{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "lb-epslice1",
+					Namespace: consts.TestNameSpace,
+					OwnerReferences: []metav1.OwnerReference{
+						{
+							Name: "lb-service",
+						},
+					},
+				},
+			},
+			{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "lb-epslice2",
+					Namespace: consts.TestNameSpace,
+					OwnerReferences: []metav1.OwnerReference{
+						{
+							Name: "lb-service",
+						},
+					},
+				},
+			},
+			{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "node-port-epslice",
+					Namespace: consts.TestNameSpace,
+					OwnerReferences: []metav1.OwnerReference{
+						{
+							Name: "node-port-service",
+						},
+					},
+				},
+			},
+		}
+		q = QueryParams{
+			epSlices: epSlices,
+			services: services,
+		}
+	)
+
+	tests := []struct {
+		desc            string
+		serviceType     corev1.ServiceType
+		expectedEpSlice map[string]bool
+	}{
+		{
+			desc:        "lb-service-only",
+			serviceType: corev1.ServiceTypeLoadBalancer,
+			expectedEpSlice: map[string]bool{
+				"lb-epslice1": true,
+				"lb-epslice2": true,
+			},
+		},
+		{
+			desc:        "node-port-only",
+			serviceType: corev1.ServiceTypeNodePort,
+			expectedEpSlice: map[string]bool{
+				"node-port-epslice": true,
+			},
+		},
+		{
+			desc:            "nonexist-type",
+			serviceType:     corev1.ServiceTypeClusterIP,
+			expectedEpSlice: map[string]bool{},
+		},
+	}
+
+	for _, test := range tests {
+		initQueryFilter(&q)
+		res := q.WithServiceType(test.serviceType).Query()
+		if err := isEqual(res, test.expectedEpSlice); err != nil {
+			t.Fatalf("test \"%s\" failed: %s", test.desc, err)
+		}
+	}
+}
+
 func isEqual(epSlices []discoveryv1.EndpointSlice, expected map[string]bool) error {
 	if len(epSlices) != len(expected) {
 		return fmt.Errorf("got %d epSlices, expected %d", len(epSlices), len(expected))
