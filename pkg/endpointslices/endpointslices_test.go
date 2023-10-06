@@ -22,6 +22,7 @@ func TestWithLabels(t *testing.T) {
 		noLabels      = map[string]string{}
 		oneLabel      = map[string]string{consts.IngressLabel: ""}
 		twoLabels     = map[string]string{consts.IngressLabel: "", "optional": "true"}
+		mixedLabels   = map[string]string{consts.IngressLabel: "", "nonexist": ""}
 		nonexistLabel = map[string]string{"nonexist": ""}
 		epSlices      = []discoveryv1.EndpointSlice{
 			{
@@ -81,6 +82,12 @@ func TestWithLabels(t *testing.T) {
 			expectedEpSlice: map[string]bool{
 				"epSliceTwoLabels": true,
 			},
+		},
+		{
+			q:               queryParams,
+			desc:            "with-exist-and-nonexist-labels",
+			labels:          mixedLabels,
+			expectedEpSlice: map[string]bool{},
 		},
 		{
 			q:               queryParams,
