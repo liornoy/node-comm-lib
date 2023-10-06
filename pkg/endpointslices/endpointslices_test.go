@@ -111,20 +111,18 @@ func TestWithLabels(t *testing.T) {
 				},
 			},
 		}
-		queryParams = QueryParams{
+		q = QueryParams{
 			epSlices: epSlices,
 			filter:   make([]bool, len(epSlices)),
 		}
 	)
 
 	tests := []struct {
-		q               QueryParams
 		desc            string
 		labels          map[string]string
 		expectedEpSlice map[string]bool
 	}{
 		{
-			q:      queryParams,
 			desc:   "with-no-labels",
 			labels: noLabels,
 			expectedEpSlice: map[string]bool{
@@ -134,7 +132,6 @@ func TestWithLabels(t *testing.T) {
 			},
 		},
 		{
-			q:      queryParams,
 			desc:   "with-one-label",
 			labels: oneLabel,
 			expectedEpSlice: map[string]bool{
@@ -143,7 +140,6 @@ func TestWithLabels(t *testing.T) {
 			},
 		},
 		{
-			q:      queryParams,
 			desc:   "with-two-labels",
 			labels: twoLabels,
 			expectedEpSlice: map[string]bool{
@@ -151,21 +147,19 @@ func TestWithLabels(t *testing.T) {
 			},
 		},
 		{
-			q:               queryParams,
 			desc:            "with-exist-and-nonexist-labels",
 			labels:          mixedLabels,
 			expectedEpSlice: map[string]bool{},
 		},
 		{
-			q:               queryParams,
 			desc:            "with-nonexist-label",
 			labels:          nonexistLabel,
 			expectedEpSlice: map[string]bool{},
 		},
 	}
 	for _, test := range tests {
-		resetFilter(&test.q)
-		res := test.q.WithLabels(test.labels).Query()
+		resetFilter(&q)
+		res := q.WithLabels(test.labels).Query()
 		if err := isEqual(res, test.expectedEpSlice); err != nil {
 			t.Fatalf("test \"%s\" failed: %s", test.desc, err)
 		}
@@ -194,19 +188,17 @@ func TestQuery(t *testing.T) {
 				},
 			},
 		}
-		queryParams = QueryParams{
+		q = QueryParams{
 			epSlices: epSlices,
 		}
 	)
 
 	tests := []struct {
-		q               QueryParams
 		desc            string
 		filter          []bool
 		expectedEpSlice map[string]bool
 	}{
 		{
-			q:      queryParams,
 			desc:   "filter-all",
 			filter: filterAll,
 			expectedEpSlice: map[string]bool{
@@ -216,21 +208,20 @@ func TestQuery(t *testing.T) {
 			},
 		},
 		{
-			q:               queryParams,
 			desc:            "filter-none",
 			filter:          filterNone,
 			expectedEpSlice: map[string]bool{},
 		},
 		{
-			q:               queryParams,
 			desc:            "filter-first",
 			filter:          filterFirst,
 			expectedEpSlice: map[string]bool{"epslice1": true},
 		},
 	}
+
 	for _, test := range tests {
-		test.q.filter = test.filter
-		res := test.q.Query()
+		q.filter = test.filter
+		res := q.Query()
 		if err := isEqual(res, test.expectedEpSlice); err != nil {
 			t.Fatalf("test \"%s\" failed: %s", test.desc, err)
 		}
