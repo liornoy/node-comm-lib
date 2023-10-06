@@ -105,6 +105,71 @@ func TestWithLabels(t *testing.T) {
 	}
 }
 
+func TestQuery(t *testing.T) {
+	var (
+		filterAll   = []bool{true, true, true}
+		filterNone  = []bool{false, false, false}
+		filterFirst = []bool{true, false, false}
+		epSlices    = []discoveryv1.EndpointSlice{
+			{
+				ObjectMeta: v1.ObjectMeta{
+					Name: "epSlice1",
+				},
+			},
+			{
+				ObjectMeta: v1.ObjectMeta{
+					Name: "epSlice2",
+				},
+			},
+			{
+				ObjectMeta: v1.ObjectMeta{
+					Name: "epSlice3",
+				},
+			},
+		}
+		queryParams = QueryParams{
+			epSlices: epSlices,
+		}
+	)
+
+	tests := []struct {
+		q               QueryParams
+		desc            string
+		filter          []bool
+		expectedEpSlice map[string]bool
+	}{
+		{
+			q:      queryParams,
+			desc:   "filter-all",
+			filter: filterAll,
+			expectedEpSlice: map[string]bool{
+				"epSlice1": true,
+				"epSlice2": true,
+				"epSlice3": true,
+			},
+		},
+		{
+			q:               queryParams,
+			desc:            "filter-none",
+			filter:          filterNone,
+			expectedEpSlice: map[string]bool{},
+		},
+		{
+			q:               queryParams,
+			desc:            "filter-first",
+			filter:          filterFirst,
+			expectedEpSlice: map[string]bool{"epSlice1": true},
+		},
+	}
+	for _, test := range tests {
+		test.q.filter = test.filter
+		res := test.q.Query()
+		if err := isEqual(res, test.expectedEpSlice); err != nil {
+			t.Fatalf("test \"%s\" failed: %s", test.desc, err)
+		}
+	}
+}
+
 func isEqual(epSlices []discoveryv1.EndpointSlice, expected map[string]bool) error {
 	if len(epSlices) != len(expected) {
 		return fmt.Errorf("got %d epSlices, expected %d", len(epSlices), len(expected))
