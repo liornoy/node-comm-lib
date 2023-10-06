@@ -237,6 +237,88 @@ func TestQuery(t *testing.T) {
 	}
 }
 
+func TestWithHostNetwork(t *testing.T) {
+	var (
+		pods = []corev1.Pod{
+			{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "hostnetwork-pod",
+					Namespace: consts.TestNameSpace,
+				},
+				Spec: corev1.PodSpec{
+					HostNetwork: true,
+				},
+			},
+			{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "non-hostnetwork-pod",
+					Namespace: consts.TestNameSpace,
+				},
+				Spec: corev1.PodSpec{
+					HostNetwork: false,
+				},
+			},
+		}
+		epSlices = []discoveryv1.EndpointSlice{
+			{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "with-hostnetwork",
+				},
+				Endpoints: []discoveryv1.Endpoint{
+					{
+						TargetRef: &corev1.ObjectReference{
+							Name:      "hostnetwork-pod",
+							Namespace: consts.TestNameSpace,
+						},
+					},
+				},
+			},
+			{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "with-non-hostnetwork",
+				},
+				Endpoints: []discoveryv1.Endpoint{
+					{
+						TargetRef: &corev1.ObjectReference{
+							Name:      "non-hostnetwork-pod",
+							Namespace: consts.TestNameSpace,
+						},
+					},
+				},
+			},
+			{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "with-no-endpoints",
+				},
+			},
+			{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "with-no-target-ref",
+				},
+				Endpoints: []discoveryv1.Endpoint{
+					{
+						Addresses: []string{"1.1.1.1"},
+					},
+				},
+			},
+		}
+		q = QueryParams{
+			epSlices: epSlices,
+			pods:     pods,
+			filter:   make([]bool, len(epSlices)),
+		}
+	)
+
+	expectedEpSlice := map[string]bool{
+		"with-hostnetwork": true,
+	}
+
+	res := q.WithHostNetwork().Query()
+	if err := isEqual(res, expectedEpSlice); err != nil {
+		t.Fatalf("test \"with-hostnetwork\" failed: %s", err)
+	}
+}
+
 func isEqual(epSlices []discoveryv1.EndpointSlice, expected map[string]bool) error {
 	if len(epSlices) != len(expected) {
 		return fmt.Errorf("got %d epSlices, expected %d", len(epSlices), len(expected))
