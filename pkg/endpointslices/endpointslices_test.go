@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	discoveryv1 "k8s.io/api/discovery/v1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/liornoy/main/node-comm-lib/pkg/consts"
 )
@@ -26,19 +26,19 @@ func TestWithLabels(t *testing.T) {
 		nonexistLabel = map[string]string{"nonexist": ""}
 		epSlices      = []discoveryv1.EndpointSlice{
 			{
-				ObjectMeta: v1.ObjectMeta{
+				ObjectMeta: metav1.ObjectMeta{
 					Name:   "epSliceNoLabels",
 					Labels: noLabels,
 				},
 			},
 			{
-				ObjectMeta: v1.ObjectMeta{
+				ObjectMeta: metav1.ObjectMeta{
 					Name:   "epSliceOneLabel",
 					Labels: oneLabel,
 				},
 			},
 			{
-				ObjectMeta: v1.ObjectMeta{
+				ObjectMeta: metav1.ObjectMeta{
 					Name:   "epSliceTwoLabels",
 					Labels: twoLabels,
 				},
@@ -112,17 +112,17 @@ func TestQuery(t *testing.T) {
 		filterFirst = []bool{true, false, false}
 		epSlices    = []discoveryv1.EndpointSlice{
 			{
-				ObjectMeta: v1.ObjectMeta{
+				ObjectMeta: metav1.ObjectMeta{
 					Name: "epSlice1",
 				},
 			},
 			{
-				ObjectMeta: v1.ObjectMeta{
+				ObjectMeta: metav1.ObjectMeta{
 					Name: "epSlice2",
 				},
 			},
 			{
-				ObjectMeta: v1.ObjectMeta{
+				ObjectMeta: metav1.ObjectMeta{
 					Name: "epSlice3",
 				},
 			},
