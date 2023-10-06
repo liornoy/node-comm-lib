@@ -73,14 +73,14 @@ var _ = Describe("Comm Matrix", func() {
 			epSliceQuery, err := endpointslices.NewQuery(cs)
 			Expect(err).ToNot(HaveOccurred())
 
-			ingerssSlices := epSliceQuery.
+			ingressSlice := epSliceQuery.
 				WithHostNetwork().
 				WithLabels(map[string]string{consts.IngressLabel: ""}).
 				WithServiceType(corev1.ServiceTypeNodePort).
 				WithServiceType(corev1.ServiceTypeLoadBalancer).
 				Query()
 
-			endpointSliceMat, err := commatrix.CreateComMatrix(cs, ingerssSlices)
+			endpointSliceMat, err := commatrix.CreateComMatrix(cs, ingressSlice)
 			Expect(err).ToNot(HaveOccurred())
 
 			outfile, err = os.Create("./artifacts/endpointslices-com-matirx.txt")
