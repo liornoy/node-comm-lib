@@ -4,16 +4,83 @@ import (
 	"fmt"
 	"testing"
 
+	corev1 "k8s.io/api/core/v1"
 	discoveryv1 "k8s.io/api/discovery/v1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/liornoy/main/node-comm-lib/pkg/consts"
+	"github.com/liornoy/main/node-comm-lib/pkg/fakeclient"
 )
 
 func TestNewQueryNilClient(t *testing.T) {
 	_, err := NewQuery(nil)
 	if err == nil {
 		t.Fatalf("expected error for empty client")
+	}
+}
+
+func TestNewQuery(t *testing.T) {
+	var (
+		initObjects = fakeclient.ClusterResources{
+			Pods: []corev1.Pod{
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Name: "pod1",
+					},
+				},
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Name: "pod2",
+					},
+				},
+			},
+			EpSlices: []discoveryv1.EndpointSlice{
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Name: "epslice1",
+					},
+				},
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Name: "epslice2",
+					},
+				},
+			},
+			Services: []corev1.Service{
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Name: "service1",
+					},
+				},
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Name: "serivce2",
+					},
+				},
+			},
+		}
+	)
+
+	c, err := fakeclient.New(fakeclient.ObjectsFromResources(initObjects))
+	if err != nil {
+		t.Fatalf("failed to create client: %s", err)
+	}
+
+	q, err := NewQuery(c)
+	if err != nil {
+		t.Fatalf("failed to create new query: %s", err)
+	}
+
+	if len(q.pods) != len(initObjects.Pods) {
+		t.Fatalf("queryParam has %d Pods, expected %d", len(q.pods), len(initObjects.Pods))
+	}
+
+	if len(q.epSlices) != len(initObjects.EpSlices) {
+		t.Fatalf("queryParam has %d EndpointSlices, expected %d", len(q.epSlices), len(initObjects.EpSlices))
+	}
+
+	if len(q.services) != len(initObjects.Services) {
+		t.Fatalf("queryParam has %d Services, expected %d", len(q.services), len(initObjects.Services))
 	}
 }
 
@@ -26,19 +93,19 @@ func TestWithLabels(t *testing.T) {
 		nonexistLabel = map[string]string{"nonexist": ""}
 		epSlices      = []discoveryv1.EndpointSlice{
 			{
-				ObjectMeta: v1.ObjectMeta{
+				ObjectMeta: metav1.ObjectMeta{
 					Name:   "epSliceNoLabels",
 					Labels: noLabels,
 				},
 			},
 			{
-				ObjectMeta: v1.ObjectMeta{
+				ObjectMeta: metav1.ObjectMeta{
 					Name:   "epSliceOneLabel",
 					Labels: oneLabel,
 				},
 			},
 			{
-				ObjectMeta: v1.ObjectMeta{
+				ObjectMeta: metav1.ObjectMeta{
 					Name:   "epSliceTwoLabels",
 					Labels: twoLabels,
 				},
@@ -112,17 +179,17 @@ func TestQuery(t *testing.T) {
 		filterFirst = []bool{true, false, false}
 		epSlices    = []discoveryv1.EndpointSlice{
 			{
-				ObjectMeta: v1.ObjectMeta{
+				ObjectMeta: metav1.ObjectMeta{
 					Name: "epSlice1",
 				},
 			},
 			{
-				ObjectMeta: v1.ObjectMeta{
+				ObjectMeta: metav1.ObjectMeta{
 					Name: "epSlice2",
 				},
 			},
 			{
-				ObjectMeta: v1.ObjectMeta{
+				ObjectMeta: metav1.ObjectMeta{
 					Name: "epSlice3",
 				},
 			},
