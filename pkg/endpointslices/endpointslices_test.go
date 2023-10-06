@@ -6,6 +6,8 @@ import (
 
 	discoveryv1 "k8s.io/api/discovery/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/liornoy/main/node-comm-lib/pkg/consts"
 )
 
 func TestNewQueryNilClient(t *testing.T) {
@@ -18,8 +20,8 @@ func TestNewQueryNilClient(t *testing.T) {
 func TestWithLabels(t *testing.T) {
 	var (
 		noLabels      = map[string]string{}
-		oneLabel      = map[string]string{"ingerss": ""}
-		twoLabels     = map[string]string{"ingerss": "", "optional": "true"}
+		oneLabel      = map[string]string{consts.IngressLabel: ""}
+		twoLabels     = map[string]string{consts.IngressLabel: "", "optional": "true"}
 		nonexistLabel = map[string]string{"nonexist": ""}
 		epSlices      = []discoveryv1.EndpointSlice{
 			{
