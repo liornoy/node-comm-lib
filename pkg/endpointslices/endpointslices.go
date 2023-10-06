@@ -83,7 +83,7 @@ func (q *QueryParams) WithLabels(labels map[string]string) QueryBuilder {
 
 func (q *QueryParams) WithHostNetwork() QueryBuilder {
 	for i, epSlice := range q.epSlices {
-		if q.withHostNetworked(epSlice) {
+		if q.withHostNetwork(epSlice) {
 			q.filter[i] = true
 		}
 	}
@@ -131,7 +131,7 @@ func (q *QueryParams) withServiceType(epSlice discoveryv1.EndpointSlice, service
 	return false
 }
 
-func (q *QueryParams) withHostNetworked(epSlice discoveryv1.EndpointSlice) bool {
+func (q *QueryParams) withHostNetwork(epSlice discoveryv1.EndpointSlice) bool {
 	if len(epSlice.Endpoints) == 0 {
 		return false
 	}
