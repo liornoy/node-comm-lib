@@ -94,19 +94,19 @@ func TestWithLabels(t *testing.T) {
 		epSlices      = []discoveryv1.EndpointSlice{
 			{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:   "epSliceNoLabels",
+					Name:   "epslice-no-labels",
 					Labels: noLabels,
 				},
 			},
 			{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:   "epSliceOneLabel",
+					Name:   "epslice-one-label",
 					Labels: oneLabel,
 				},
 			},
 			{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:   "epSliceTwoLabels",
+					Name:   "epslice-two-labels",
 					Labels: twoLabels,
 				},
 			},
@@ -128,9 +128,9 @@ func TestWithLabels(t *testing.T) {
 			desc:   "with-no-labels",
 			labels: noLabels,
 			expectedEpSlice: map[string]bool{
-				"epSliceNoLabels":  true,
-				"epSliceOneLabel":  true,
-				"epSliceTwoLabels": true,
+				"epslice-no-labels":  true,
+				"epslice-one-label":  true,
+				"epslice-two-labels": true,
 			},
 		},
 		{
@@ -138,8 +138,8 @@ func TestWithLabels(t *testing.T) {
 			desc:   "with-one-label",
 			labels: oneLabel,
 			expectedEpSlice: map[string]bool{
-				"epSliceOneLabel":  true,
-				"epSliceTwoLabels": true,
+				"epslice-one-label":  true,
+				"epslice-two-labels": true,
 			},
 		},
 		{
@@ -147,7 +147,7 @@ func TestWithLabels(t *testing.T) {
 			desc:   "with-two-labels",
 			labels: twoLabels,
 			expectedEpSlice: map[string]bool{
-				"epSliceTwoLabels": true,
+				"epslice-two-labels": true,
 			},
 		},
 		{
@@ -180,17 +180,17 @@ func TestQuery(t *testing.T) {
 		epSlices    = []discoveryv1.EndpointSlice{
 			{
 				ObjectMeta: metav1.ObjectMeta{
-					Name: "epSlice1",
+					Name: "epslice1",
 				},
 			},
 			{
 				ObjectMeta: metav1.ObjectMeta{
-					Name: "epSlice2",
+					Name: "epslice2",
 				},
 			},
 			{
 				ObjectMeta: metav1.ObjectMeta{
-					Name: "epSlice3",
+					Name: "epslice3",
 				},
 			},
 		}
@@ -210,9 +210,9 @@ func TestQuery(t *testing.T) {
 			desc:   "filter-all",
 			filter: filterAll,
 			expectedEpSlice: map[string]bool{
-				"epSlice1": true,
-				"epSlice2": true,
-				"epSlice3": true,
+				"epslice1": true,
+				"epslice2": true,
+				"epslice3": true,
 			},
 		},
 		{
@@ -225,7 +225,7 @@ func TestQuery(t *testing.T) {
 			q:               queryParams,
 			desc:            "filter-first",
 			filter:          filterFirst,
-			expectedEpSlice: map[string]bool{"epSlice1": true},
+			expectedEpSlice: map[string]bool{"epslice1": true},
 		},
 	}
 	for _, test := range tests {
