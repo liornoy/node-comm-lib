@@ -111,20 +111,17 @@ func TestWithLabels(t *testing.T) {
 				},
 			},
 		}
-		queryParams = QueryParams{
+		q = QueryParams{
 			epSlices: epSlices,
-			filter:   make([]bool, len(epSlices)),
 		}
 	)
 
 	tests := []struct {
-		q               QueryParams
 		desc            string
 		labels          map[string]string
 		expectedEpSlice map[string]bool
 	}{
 		{
-			q:      queryParams,
 			desc:   "with-no-labels",
 			labels: noLabels,
 			expectedEpSlice: map[string]bool{
@@ -134,7 +131,6 @@ func TestWithLabels(t *testing.T) {
 			},
 		},
 		{
-			q:      queryParams,
 			desc:   "with-one-label",
 			labels: oneLabel,
 			expectedEpSlice: map[string]bool{
@@ -143,7 +139,6 @@ func TestWithLabels(t *testing.T) {
 			},
 		},
 		{
-			q:      queryParams,
 			desc:   "with-two-labels",
 			labels: twoLabels,
 			expectedEpSlice: map[string]bool{
@@ -151,21 +146,19 @@ func TestWithLabels(t *testing.T) {
 			},
 		},
 		{
-			q:               queryParams,
 			desc:            "with-exist-and-nonexist-labels",
 			labels:          mixedLabels,
 			expectedEpSlice: map[string]bool{},
 		},
 		{
-			q:               queryParams,
 			desc:            "with-nonexist-label",
 			labels:          nonexistLabel,
 			expectedEpSlice: map[string]bool{},
 		},
 	}
 	for _, test := range tests {
-		resetFilter(&test.q)
-		res := test.q.WithLabels(test.labels).Query()
+		initQueryFilter(&q)
+		res := q.WithLabels(test.labels).Query()
 		if err := isEqual(res, test.expectedEpSlice); err != nil {
 			t.Fatalf("test \"%s\" failed: %s", test.desc, err)
 		}
@@ -194,19 +187,17 @@ func TestQuery(t *testing.T) {
 				},
 			},
 		}
-		queryParams = QueryParams{
+		q = QueryParams{
 			epSlices: epSlices,
 		}
 	)
 
 	tests := []struct {
-		q               QueryParams
 		desc            string
 		filter          []bool
 		expectedEpSlice map[string]bool
 	}{
 		{
-			q:      queryParams,
 			desc:   "filter-all",
 			filter: filterAll,
 			expectedEpSlice: map[string]bool{
@@ -216,21 +207,20 @@ func TestQuery(t *testing.T) {
 			},
 		},
 		{
-			q:               queryParams,
 			desc:            "filter-none",
 			filter:          filterNone,
 			expectedEpSlice: map[string]bool{},
 		},
 		{
-			q:               queryParams,
 			desc:            "filter-first",
 			filter:          filterFirst,
 			expectedEpSlice: map[string]bool{"epslice1": true},
 		},
 	}
+
 	for _, test := range tests {
-		test.q.filter = test.filter
-		res := test.q.Query()
+		q.filter = test.filter
+		res := q.Query()
 		if err := isEqual(res, test.expectedEpSlice); err != nil {
 			t.Fatalf("test \"%s\" failed: %s", test.desc, err)
 		}
@@ -302,20 +292,117 @@ func TestWithHostNetwork(t *testing.T) {
 				},
 			},
 		}
+		expectedEpSlice = map[string]bool{
+			"with-hostnetwork": true,
+		}
 		q = QueryParams{
 			epSlices: epSlices,
 			pods:     pods,
-			filter:   make([]bool, len(epSlices)),
 		}
 	)
 
-	expectedEpSlice := map[string]bool{
-		"with-hostnetwork": true,
-	}
-
+	initQueryFilter(&q)
 	res := q.WithHostNetwork().Query()
 	if err := isEqual(res, expectedEpSlice); err != nil {
 		t.Fatalf("test \"with-hostnetwork\" failed: %s", err)
+	}
+}
+
+func TestWithServiceType(t *testing.T) {
+	var (
+		loadBalancerService = corev1.Service{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "lb-service",
+				Namespace: consts.TestNameSpace,
+			},
+			Spec: corev1.ServiceSpec{
+				Type: corev1.ServiceTypeLoadBalancer,
+			},
+		}
+		nodePortService = corev1.Service{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "node-port-service",
+				Namespace: consts.TestNameSpace,
+			},
+			Spec: corev1.ServiceSpec{
+				Type: corev1.ServiceTypeNodePort,
+			},
+		}
+		services = []corev1.Service{loadBalancerService, nodePortService}
+		epSlices = []discoveryv1.EndpointSlice{
+			{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "lb-epslice1",
+					Namespace: consts.TestNameSpace,
+					OwnerReferences: []metav1.OwnerReference{
+						{
+							Name: "lb-service",
+						},
+					},
+				},
+			},
+			{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "lb-epslice2",
+					Namespace: consts.TestNameSpace,
+					OwnerReferences: []metav1.OwnerReference{
+						{
+							Name: "lb-service",
+						},
+					},
+				},
+			},
+			{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "node-port-epslice",
+					Namespace: consts.TestNameSpace,
+					OwnerReferences: []metav1.OwnerReference{
+						{
+							Name: "node-port-service",
+						},
+					},
+				},
+			},
+		}
+		q = QueryParams{
+			epSlices: epSlices,
+			services: services,
+		}
+	)
+
+	tests := []struct {
+		desc            string
+		serviceType     corev1.ServiceType
+		expectedEpSlice map[string]bool
+	}{
+		{
+			desc:        "lb-service-only",
+			serviceType: corev1.ServiceTypeLoadBalancer,
+			expectedEpSlice: map[string]bool{
+				"lb-epslice1": true,
+				"lb-epslice2": true,
+			},
+		},
+		{
+			desc:        "node-port-only",
+			serviceType: corev1.ServiceTypeNodePort,
+			expectedEpSlice: map[string]bool{
+				"node-port-epslice": true,
+			},
+		},
+		{
+			desc:            "nonexist-type",
+			serviceType:     corev1.ServiceTypeClusterIP,
+			expectedEpSlice: map[string]bool{},
+		},
+	}
+
+	for _, test := range tests {
+		initQueryFilter(&q)
+		res := q.WithServiceType(test.serviceType).Query()
+		if err := isEqual(res, test.expectedEpSlice); err != nil {
+			t.Fatalf("test \"%s\" failed: %s", test.desc, err)
+		}
 	}
 }
 
@@ -333,7 +420,12 @@ func isEqual(epSlices []discoveryv1.EndpointSlice, expected map[string]bool) err
 	return nil
 }
 
-func resetFilter(q *QueryParams) {
+func initQueryFilter(q *QueryParams) {
+	if q.filter == nil {
+		q.filter = make([]bool, len(q.epSlices))
+		return
+	}
+
 	for i := range q.filter {
 		q.filter[i] = false
 	}
