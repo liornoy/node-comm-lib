@@ -43,35 +43,42 @@ func CreateComMatrix(cs *client.ClientSet, epSlices []discoveryv1.EndpointSlice)
 	}
 
 	nodesRoles := GetNodesRoles(nodes)
-	res := make([]ComDetails, 0)
+	comDetails := make([]ComDetails, 0)
 
 	for _, epSlice := range epSlices {
-		required := "true"
-		if _, ok := epSlice.Labels["optional"]; ok {
-			required = "false"
-		}
-		ports := make([]string, 0)
-		protocols := make([]string, 0)
+		cd := createComDetails(epSlice, nodesRoles)
+		comDetails = append(comDetails, cd...)
+	}
+
+	res := ComMatrix{Matrix: RemoveDups(comDetails)}
+
+	return res, nil
+}
+
+func createComDetails(epSlice discoveryv1.EndpointSlice, nodesRoles map[string]string) []ComDetails {
+	res := make([]ComDetails, 0)
+
+	required := "true"
+	if _, ok := epSlice.Labels["optional"]; ok {
+		required = "false"
+	}
+
+	services := epSlice.Labels["kubernetes.io/service-name"]
+	for _, endpoint := range epSlice.Endpoints {
 		for _, p := range epSlice.Ports {
-			ports = append(ports, fmt.Sprint(*p.Port))
-			protocols = append(protocols, fmt.Sprint(*p.Protocol))
-		}
-		services := epSlice.Labels["kubernetes.io/service-name"]
-		for _, endpoint := range epSlice.Endpoints {
-			comDetails := &ComDetails{
+			comDetails := ComDetails{
 				Direction:   "ingress",
-				Protocol:    strings.Join(protocols, ","),
-				Port:        strings.Join(ports, ","),
+				Protocol:    fmt.Sprint(*p.Protocol),
+				Port:        fmt.Sprint(*p.Port),
 				NodeRole:    nodesRoles[*endpoint.NodeName],
 				ServiceName: services,
 				Required:    required,
 			}
-			res = append(res, *comDetails)
+			res = append(res, comDetails)
 		}
 	}
-	res = RemoveDups(res)
 
-	return ComMatrix{Matrix: res}, nil
+	return res
 }
 
 func (m ComMatrix) ToCSV() ([]byte, error) {
