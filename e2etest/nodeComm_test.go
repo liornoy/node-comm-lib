@@ -214,44 +214,48 @@ func generateClusterComMatrix(cs *client.ClientSet) (commatrix.ComMatrix, error)
 
 func ssToComDetails(ssOutput string, role string, protocol string) []commatrix.ComDetails {
 	res := make([]commatrix.ComDetails, 0)
-
 	reader := strings.NewReader(ssOutput)
 	scanner := bufio.NewScanner(reader)
 
 	for scanner.Scan() {
-		text := scanner.Text()
+		line := scanner.Text()
 
-		if strings.Contains(text, "127.0.0") {
-			continue
-		}
-		if protocol == "TCP" && !strings.Contains(text, "LISTEN") {
-			continue
-		}
-		if protocol == "UDP" && !strings.Contains(text, "ESTAB") {
-			continue
-		}
-		tokens := strings.Fields(text)
-		if len(tokens) < 4 {
+		if skipSSline(line, protocol) {
 			continue
 		}
 
-		process := "empty"
-		if len(tokens) == 6 {
-			process = getInDoubleQuotes(tokens[5])
-		}
-
-		idx := strings.LastIndex(tokens[3], ":")
-		port := tokens[3][idx+1:]
-
-		res = append(res, commatrix.ComDetails{
-			Direction:   "ingress",
-			Protocol:    protocol,
-			Port:        port,
-			NodeRole:    role,
-			ServiceName: process})
+		comDetail := defineComDetail(line, protocol, role)
+		res = append(res, comDetail)
 	}
 
 	return res
+}
+
+func skipSSline(line, protocol string) bool {
+	fields := strings.Fields(line)
+
+	if strings.Contains(line, "127.0.0") ||
+		(protocol == "TCP" && !strings.Contains(line, "LISTEN")) ||
+		(protocol == "UDP" && !strings.Contains(line, "ESTAB")) ||
+		len(fields) != 6 {
+		return true
+	}
+	return false
+}
+
+func defineComDetail(line string, protocol string, role string) commatrix.ComDetails {
+	fields := strings.Fields(line)
+	process := getInDoubleQuotes(fields[5])
+
+	idx := strings.LastIndex(fields[3], ":")
+	port := fields[3][idx+1:]
+
+	return commatrix.ComDetails{
+		Direction:   "ingress",
+		Protocol:    protocol,
+		Port:        port,
+		NodeRole:    role,
+		ServiceName: process}
 }
 
 func portsToString(endpointPorts []discoveryv1.EndpointPort) string {
