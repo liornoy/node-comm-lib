@@ -64,7 +64,7 @@ func createComDetails(epSlice discoveryv1.EndpointSlice, nodesRoles map[string]s
 		required = "false"
 	}
 
-	services := epSlice.Labels["kubernetes.io/service-name"]
+	service := epSlice.Labels["kubernetes.io/service-name"]
 	for _, endpoint := range epSlice.Endpoints {
 		for _, p := range epSlice.Ports {
 			comDetails := ComDetails{
@@ -72,7 +72,7 @@ func createComDetails(epSlice discoveryv1.EndpointSlice, nodesRoles map[string]s
 				Protocol:    fmt.Sprint(*p.Protocol),
 				Port:        fmt.Sprint(*p.Port),
 				NodeRole:    nodesRoles[*endpoint.NodeName],
-				ServiceName: services,
+				ServiceName: service,
 				Required:    required,
 			}
 			res = append(res, comDetails)
