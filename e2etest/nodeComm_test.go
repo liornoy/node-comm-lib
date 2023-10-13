@@ -245,7 +245,7 @@ func skipSSline(line, protocol string) bool {
 
 func defineComDetail(line string, protocol string, role string) commatrix.ComDetails {
 	fields := strings.Fields(line)
-	process := getInDoubleQuotes(fields[5])
+	process := getStrBetweenDoubleQuotes(fields[5])
 
 	idx := strings.LastIndex(fields[3], ":")
 	port := fields[3][idx+1:]
@@ -267,7 +267,7 @@ func portsToString(endpointPorts []discoveryv1.EndpointPort) string {
 	return strings.Join(res, ",")
 }
 
-func getInDoubleQuotes(s string) string {
+func getStrBetweenDoubleQuotes(s string) string {
 	res := make([]string, 0)
 	for idx, endIdx := 0, 0; strings.Index(s, "\"") != -1; s = s[idx+endIdx+2:] {
 		idx = strings.Index(s, "\"")
