@@ -50,7 +50,8 @@ func CreateComMatrix(cs *client.ClientSet, epSlices []discoveryv1.EndpointSlice)
 		comDetails = append(comDetails, cd...)
 	}
 
-	res := ComMatrix{Matrix: RemoveDups(comDetails)}
+	cleanedComDetails := RemoveDups(comDetails)
+	res := ComMatrix{Matrix: cleanedComDetails}
 
 	return res, nil
 }
