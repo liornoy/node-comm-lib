@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"reflect"
 	"strconv"
 	"strings"
 
@@ -61,7 +62,7 @@ var _ = Describe("Comm Matrix", func() {
 
 	Context("create a comm matrix from the cluster", func() {
 		It("should equal to what the nodes are actually listening on", func() {
-			clusterComMat, err := generateClusterComMatrix(cs)
+			expectedComMat, err := generateClusterComMatrix(cs)
 			Expect(err).ToNot(HaveOccurred())
 
 			epSliceQuery, err := endpointslices.NewQuery(cs)
@@ -77,7 +78,10 @@ var _ = Describe("Comm Matrix", func() {
 			endpointSliceMat, err := commatrix.CreateComMatrix(cs, ingressSlice)
 			Expect(err).ToNot(HaveOccurred())
 
-			err = printArtifacts(clusterComMat, endpointSliceMat)
+			Expect(reflect.DeepEqual(endpointSliceMat, expectedComMat)).To(BeTrue(),
+				"expected communication matrix different than generated")
+
+			err = printArtifacts(expectedComMat, endpointSliceMat)
 			Expect(err).ToNot(HaveOccurred())
 		})
 	})
