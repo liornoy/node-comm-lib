@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path"
 	"strconv"
 	"strings"
 
@@ -63,13 +64,6 @@ var _ = Describe("Comm Matrix", func() {
 			clusterComMat, err := generateClusterComMatrix(cs)
 			Expect(err).ToNot(HaveOccurred())
 
-			outfile, err := os.Create("./artifacts/ss-command-com-matrix.txt")
-			Expect(err).ToNot(HaveOccurred())
-			defer outfile.Close()
-			err = printComMat(clusterComMat, outfile)
-			Expect(err).ToNot(HaveOccurred())
-			outfile.Close()
-
 			epSliceQuery, err := endpointslices.NewQuery(cs)
 			Expect(err).ToNot(HaveOccurred())
 
@@ -83,14 +77,39 @@ var _ = Describe("Comm Matrix", func() {
 			endpointSliceMat, err := commatrix.CreateComMatrix(cs, ingressSlice)
 			Expect(err).ToNot(HaveOccurred())
 
-			outfile, err = os.Create("./artifacts/endpointslices-com-matirx.txt")
-			Expect(err).ToNot(HaveOccurred())
-			defer outfile.Close()
-			err = printComMat(endpointSliceMat, outfile)
+			err = printArtifacts(clusterComMat, endpointSliceMat)
 			Expect(err).ToNot(HaveOccurred())
 		})
 	})
 })
+
+func printArtifacts(ssComMat commatrix.ComMatrix, slicesComMat commatrix.ComMatrix) error {
+	ssComMatPath := path.Join(artifactsPath, "ss-command-com-matrix.txt")
+	outfile, err := os.Create(ssComMatPath)
+	if err != nil {
+		return err
+	}
+
+	defer outfile.Close()
+	err = printComMat(ssComMat, outfile)
+	if err != nil {
+		return err
+	}
+	outfile.Close()
+
+	slicesComMatPath := path.Join(artifactsPath, "endpointslices-com-matirx.txt")
+	outfile, err = os.Create(slicesComMatPath)
+	if err != nil {
+		return err
+	}
+	defer outfile.Close()
+	err = printComMat(slicesComMat, outfile)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
 
 func printComMat(comMat commatrix.ComMatrix, f *os.File) error {
 	for _, cd := range comMat.Matrix {
@@ -196,13 +215,15 @@ func generateClusterComMatrix(cs *client.ClientSet) (commatrix.ComMatrix, error)
 
 	comDetails := make([]commatrix.ComDetails, 0)
 	for _, n := range nodes.Items {
-		tcpOutput, err := os.ReadFile("./artifacts/" + n.Name + "-tcp.txt")
+		tcpFileName := n.Name + "-tcp.txt"
+		tcpOutput, err := os.ReadFile(path.Join(artifactsPath, tcpFileName))
 		Expect(err).ToNot(HaveOccurred())
 
 		tcpComDetails := ssToComDetails(string(tcpOutput), nodesRoles[n.Name], "TCP")
 		comDetails = append(comDetails, tcpComDetails...)
 
-		udpOutput, err := os.ReadFile("./artifacts/" + n.Name + "-udp.txt")
+		udpFileName := n.Name + "-udp.txt"
+		udpOutput, err := os.ReadFile(path.Join(artifactsPath, udpFileName))
 		Expect(err).ToNot(HaveOccurred())
 
 		udpComDetails := ssToComDetails(string(udpOutput), nodesRoles[n.Name], "UDP")
