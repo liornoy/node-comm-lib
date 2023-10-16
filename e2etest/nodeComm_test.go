@@ -78,11 +78,11 @@ var _ = Describe("Comm Matrix", func() {
 			endpointSliceMat, err := commatrix.CreateComMatrix(cs, ingressSlice)
 			Expect(err).ToNot(HaveOccurred())
 
-			Expect(reflect.DeepEqual(endpointSliceMat, expectedComMat)).To(BeTrue(),
-				"expected communication matrix different than generated")
-
 			err = printArtifacts(expectedComMat, endpointSliceMat)
 			Expect(err).ToNot(HaveOccurred())
+
+			Expect(reflect.DeepEqual(endpointSliceMat, expectedComMat)).To(BeTrue(),
+				"expected communication matrix different than generated")
 		})
 	})
 })
