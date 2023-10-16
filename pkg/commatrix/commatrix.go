@@ -25,11 +25,11 @@ type ComDetails struct {
 	Port        string `json:"port"`
 	NodeRole    string `json:"nodeRole"`
 	ServiceName string `json:"serviceName"`
-	Required    string `json:"required"`
+	Required    bool   `json:"required"`
 }
 
 func (cd ComDetails) String() string {
-	return fmt.Sprintf("%s,%s,%s,%s,%s,%s", cd.Direction, cd.Protocol, cd.Port, cd.NodeRole, cd.ServiceName, cd.Required)
+	return fmt.Sprintf("%s,%s,%s,%s,%s,%v", cd.Direction, cd.Protocol, cd.Port, cd.NodeRole, cd.ServiceName, cd.Required)
 }
 
 func CreateComMatrix(cs *client.ClientSet, epSlices []discoveryv1.EndpointSlice) (ComMatrix, error) {
@@ -59,9 +59,9 @@ func CreateComMatrix(cs *client.ClientSet, epSlices []discoveryv1.EndpointSlice)
 func createComDetails(epSlice discoveryv1.EndpointSlice, nodesRoles map[string]string) []ComDetails {
 	res := make([]ComDetails, 0)
 
-	required := "true"
+	required := true
 	if _, ok := epSlice.Labels["optional"]; ok {
-		required = "false"
+		required = false
 	}
 
 	service := epSlice.Labels["kubernetes.io/service-name"]

@@ -173,7 +173,7 @@ func createHostServiceSlices(cs *client.ClientSet) error {
 			},
 			AddressType: "IPv4",
 		}
-		if s.Required == "false" {
+		if !s.Required {
 			endpointSlice.Labels["optional"] = "true"
 		}
 
@@ -272,18 +272,26 @@ func skipSSline(line, protocol string) bool {
 }
 
 func defineComDetail(line string, protocol string, role string) commatrix.ComDetails {
+	optionalProcesses := map[string]bool{
+		"rpc.statd": false,
+		"rpcbind":   false,
+		"sshd":      false,
+	}
 	fields := strings.Fields(line)
 	process := getStrBetweenDoubleQuotes(fields[5])
 
 	idx := strings.LastIndex(fields[3], ":")
 	port := fields[3][idx+1:]
 
+	_, required := optionalProcesses[process]
+
 	return commatrix.ComDetails{
 		Direction:   "ingress",
 		Protocol:    protocol,
 		Port:        port,
 		NodeRole:    role,
-		ServiceName: process}
+		ServiceName: process,
+		Required:    required}
 }
 
 func portsToString(endpointPorts []discoveryv1.EndpointPort) string {
