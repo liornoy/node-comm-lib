@@ -65,9 +65,8 @@ var _ = Describe("Comm Matrix", func() {
 
 			outfile, err := os.Create("./artifacts/ss-command-com-matrix.txt")
 			Expect(err).ToNot(HaveOccurred())
-			stdout := os.Stdout
-			os.Stdout = outfile
-			printComMat(clusterComMat)
+			defer outfile.Close()
+			printComMat(clusterComMat, outfile)
 			outfile.Close()
 
 			epSliceQuery, err := endpointslices.NewQuery(cs)
@@ -85,18 +84,15 @@ var _ = Describe("Comm Matrix", func() {
 
 			outfile, err = os.Create("./artifacts/endpointslices-com-matirx.txt")
 			Expect(err).ToNot(HaveOccurred())
-			os.Stdout = outfile
-			printComMat(endpointSliceMat)
-			outfile.Close()
-
-			os.Stdout = stdout
+			defer outfile.Close()
+			printComMat(endpointSliceMat, outfile)
 		})
 	})
 })
 
-func printComMat(comMat commatrix.ComMatrix) {
+func printComMat(comMat commatrix.ComMatrix, f *os.File) {
 	for _, cd := range comMat.Matrix {
-		fmt.Println(cd)
+		f.Write([]byte(fmt.Sprintln(cd)))
 	}
 }
 
