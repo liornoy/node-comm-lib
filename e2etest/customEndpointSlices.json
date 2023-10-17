@@ -10,31 +10,36 @@
         "protocol":    "TCP",
         "port":        "9107",
         "nodeRole":    "worker",
-        "serviceName": "ovnkube"
+        "serviceName": "ovnkube",
+        "required": true
     },
     {
         "protocol":    "TCP",
         "port":        "10010",
         "nodeRole":    "worker",
-        "serviceName": "crio"
+        "serviceName": "crio",
+        "required": true
     },
     {
         "protocol":    "TCP",
         "port":        "10250",
         "nodeRole":    "worker",
-        "serviceName": "kubelet"
+        "serviceName": "kubelet",
+        "required": true
     },
     {
         "protocol":    "TCP",
         "port":        "9642",
         "nodeRole":    "worker",
-        "serviceName": "ovsdb-server"
+        "serviceName": "ovsdb-server",
+        "required": true
     },
     {
         "protocol":    "TCP",
         "port":        "9641",
         "nodeRole":    "worker",
-        "serviceName": "ovsdb-server"
+        "serviceName": "ovsdb-server",
+        "required": true
     },
     {
         "protocol":    "TCP",
@@ -54,7 +59,8 @@
         "protocol":    "TCP",
         "port":        "111",
         "nodeRole":    "worker",
-        "serviceName": "systemd"
+        "serviceName": "systemd",
+        "required": true
     },
     {
         "protocol":    "TCP",
@@ -67,55 +73,64 @@
         "protocol":    "TCP",
         "port":        "9537",
         "nodeRole":    "worker",
-        "serviceName": "crio"
+        "serviceName": "crio",
+        "required": true
     },
     {
         "protocol":    "TCP",
         "port":        "10256",
         "nodeRole":    "worker",
-        "serviceName": "ovnkube"
+        "serviceName": "ovnkube",
+        "required": true
     },
     {
         "protocol":    "TCP",
         "port":        "53",
         "nodeRole":    "worker",
-        "serviceName": "coredns"
+        "serviceName": "coredns",
+        "required": true
     },
     {
         "protocol":    "TCP",
         "port":        "18080",
         "nodeRole":    "worker",
-        "serviceName": "coredns"
+        "serviceName": "coredns",
+        "required": true
     },
     {
         "protocol":    "UDP",
         "port":        "68",
         "nodeRole":    "worker",
-        "serviceName": "NetworkManager"
+        "serviceName": "NetworkManager",
+        "required": true
     },
     {
         "protocol":    "TCP",
         "port":        "10010",
         "nodeRole":    "master",
-        "serviceName": "crio"
+        "serviceName": "crio",
+        "required": true
     },
     {
         "protocol":    "TCP",
         "port":        "10250",
         "nodeRole":    "master",
-        "serviceName": "kubelet"
+        "serviceName": "kubelet",
+        "required": true
     },
     {
         "protocol":    "TCP",
         "port":        "9641",
         "nodeRole":    "master",
-        "serviceName": "ovsdb-server"
+        "serviceName": "ovsdb-server",
+        "required": true
     },
     {
         "protocol":    "TCP",
         "port":        "9642",
         "nodeRole":    "master",
-        "serviceName": "ovsdb-server"
+        "serviceName": "ovsdb-server",
+        "required": true
     },
     {
         "protocol":    "TCP",
@@ -135,7 +150,8 @@
         "protocol":    "TCP",
         "port":        "111",
         "nodeRole":    "master",
-        "serviceName": "systemd"
+        "serviceName": "systemd",
+        "required": true
     },
     {
         "protocol":    "TCP",
@@ -148,25 +164,29 @@
         "protocol":    "TCP",
         "port":        "9107",
         "nodeRole":    "master",
-        "serviceName": "ovnkube"
+        "serviceName": "ovnkube",
+        "required": true
     },
     {
         "protocol":    "TCP",
         "port":        "10357",
         "nodeRole":    "master",
-        "serviceName": "cluster-policy"
+        "serviceName": "cluster-policy",
+        "required": true
     },
     {
         "protocol":    "TCP",
         "port":        "10256",
         "nodeRole":    "master",
-        "serviceName": "ovnkube"
+        "serviceName": "ovnkube",
+        "required": true
     },
     {
         "protocol":    "TCP",
         "port":        "9191",
         "nodeRole":    "master",
-        "serviceName": "machine-approve"
+        "serviceName": "machine-approve",
+        "required": true
     },
     {
         "protocol":    "TCP",
@@ -186,12 +206,14 @@
         "protocol":    "TCP",
         "port":        "60000",
         "nodeRole":    "master",
-        "serviceName": "crio"
+        "serviceName": "crio",
+        "required": true
     },
     {
         "protocol":    "TCP",
         "port":        "9447",
         "nodeRole":    "master",
-        "serviceName": "crio"
+        "serviceName": "crio",
+        "required": true
     }
 ]
