@@ -36,7 +36,7 @@ func New(kubeconfig string) (*ClientSet, error) {
 		config, err = rest.InClusterConfig()
 	}
 	if err != nil {
-		return nil, fmt.Errorf("Failed to init client")
+		return nil, fmt.Errorf("Failed to init client: %w", err)
 	}
 
 	clientSet := &ClientSet{}
