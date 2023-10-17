@@ -283,7 +283,10 @@ func defineComDetail(line string, protocol string, role string) commatrix.ComDet
 	idx := strings.LastIndex(fields[3], ":")
 	port := fields[3][idx+1:]
 
-	_, required := optionalProcesses[process]
+	required := true
+	if _, ok := optionalProcesses[process]; ok {
+		required = false
+	}
 
 	return commatrix.ComDetails{
 		Direction:   "ingress",
