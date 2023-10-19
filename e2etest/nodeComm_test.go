@@ -81,11 +81,53 @@ var _ = Describe("Comm Matrix", func() {
 			err = printArtifacts(expectedComMat, endpointSliceMat)
 			Expect(err).ToNot(HaveOccurred())
 
+			printMatDiff(endpointSliceMat, expectedComMat)
+
 			Expect(reflect.DeepEqual(endpointSliceMat, expectedComMat)).To(BeTrue(),
 				"expected communication matrix different than generated")
 		})
 	})
 })
+
+func calcMatDiff(m1 commatrix.ComMatrix, m2 commatrix.ComMatrix) []commatrix.ComDetails {
+	diff := []commatrix.ComDetails{}
+	for _, cd1 := range m1.Matrix {
+		found := false
+		for _, cd2 := range m2.Matrix {
+			containsServiceName := strings.Contains(cd1.ServiceName, cd2.ServiceName) ||
+				strings.Contains(cd2.ServiceName, cd1.ServiceName)
+			if cd1.Port == cd2.Port && containsServiceName {
+				found = true
+				break
+			}
+		}
+		if !found {
+			diff = append(diff, cd1)
+		}
+	}
+
+	return diff
+}
+
+func printMatDiff(m1 commatrix.ComMatrix, m2 commatrix.ComMatrix) {
+	diffMat1 := calcMatDiff(m1, m2)
+	diffMat2 := calcMatDiff(m2, m1)
+
+	if len(diffMat1) == 0 && len(diffMat2) == 0 {
+		fmt.Println("matrices are equal")
+		return
+	}
+
+	fmt.Println("In matrix1 but not in matrix2:")
+	for _, cd := range diffMat1 {
+		fmt.Printf("%s - %s\n", cd.Port, cd.ServiceName)
+	}
+
+	fmt.Println("\nIn matrix2 but not in matrix1:")
+	for _, cd := range diffMat2 {
+		fmt.Printf("%s - %s\n", cd.Port, cd.ServiceName)
+	}
+}
 
 func printArtifacts(ssComMat commatrix.ComMatrix, slicesComMat commatrix.ComMatrix) error {
 	ssComMatPath := path.Join(artifactsPath, "ss-command-com-matrix.txt")
