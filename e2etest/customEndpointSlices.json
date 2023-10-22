@@ -1,6 +1,20 @@
 [
     {
         "protocol":    "TCP",
+        "port":        "2380",
+        "nodeRole":    "master",
+        "serviceName": "etcd",
+        "required": true
+    },
+    {
+        "protocol":    "TCP",
+        "port":        "9978",
+        "nodeRole":    "master",
+        "serviceName": "etcd",
+        "required": true
+    },
+    {
+        "protocol":    "TCP",
         "port":        "43573",
         "nodeRole":    "worker",
         "serviceName": "rpc.statd",
