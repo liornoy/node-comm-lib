@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/exec"
 	"path"
-	"reflect"
 	"strconv"
 	"strings"
 
@@ -84,33 +83,14 @@ var _ = Describe("Comm Matrix", func() {
 			err = writeComMat(endpointSliceMat, "endpointslices-com-matirx.txt")
 			Expect(err).ToNot(HaveOccurred())
 
-			printMatDiff(endpointSliceMat, expectedComMat)
+			diff1 := endpointSliceMat.Diff(expectedComMat)
+			diff2 := expectedComMat.Diff(endpointSliceMat)
 
-			Expect(reflect.DeepEqual(endpointSliceMat, expectedComMat)).To(BeTrue(),
-				"expected communication matrix different than generated")
+			Expect(diff1.Matrix).To(BeEmpty(), fmt.Sprintf("test failed, the following ports are found in the endpointSlice matrix but not in the ss matrix:\n"))
+			Expect(diff2.Matrix).To(BeEmpty(), fmt.Sprintf("test failed, the following ports are found in the ss matrix but not in the endpointSlice matrix:\n"))
 		})
 	})
 })
-
-func printMatDiff(m1 commatrix.ComMatrix, m2 commatrix.ComMatrix) {
-	diff1 := m1.Diff(m2)
-	diff2 := m2.Diff(m1)
-
-	if len(diff1.Matrix) == 0 && len(diff2.Matrix) == 0 {
-		fmt.Println("matrices are equal")
-		return
-	}
-
-	fmt.Println("In matrix1 but not in matrix2:")
-	for _, cd := range diff1.Matrix {
-		fmt.Printf("%s - %s\n", cd.Port, cd.ServiceName)
-	}
-
-	fmt.Println("\nIn matrix2 but not in matrix1:")
-	for _, cd := range diff2.Matrix {
-		fmt.Printf("%s - %s\n", cd.Port, cd.ServiceName)
-	}
-}
 
 func writeComMat(m commatrix.ComMatrix, fileName string) error {
 	filePath := path.Join(artifactsPath, fileName)
