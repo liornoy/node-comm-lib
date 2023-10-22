@@ -15,10 +15,10 @@
     },
     {
         "protocol":    "TCP",
-        "port":        "43573",
-        "nodeRole":    "worker",
-        "serviceName": "rpc.statd",
-        "required": false
+        "port":        "9980",
+        "nodeRole":    "master",
+        "serviceName": "etcd",
+        "required": true
     },
     {
         "protocol":    "TCP",
@@ -78,13 +78,6 @@
     },
     {
         "protocol":    "TCP",
-        "port":        "53249",
-        "nodeRole":    "worker",
-        "serviceName": "rpc.statd",
-        "required": false
-    },
-    {
-        "protocol":    "TCP",
         "port":        "9537",
         "nodeRole":    "worker",
         "serviceName": "crio",
@@ -109,13 +102,6 @@
         "port":        "18080",
         "nodeRole":    "worker",
         "serviceName": "coredns",
-        "required": true
-    },
-    {
-        "protocol":    "UDP",
-        "port":        "68",
-        "nodeRole":    "worker",
-        "serviceName": "NetworkManager",
         "required": true
     },
     {
@@ -145,13 +131,6 @@
         "nodeRole":    "master",
         "serviceName": "ovsdb-server",
         "required": true
-    },
-    {
-        "protocol":    "TCP",
-        "port":        "45559",
-        "nodeRole":    "master",
-        "serviceName": "rpc.statd",
-        "required": false
     },
     {
         "protocol":    "TCP",
@@ -204,20 +183,6 @@
     },
     {
         "protocol":    "TCP",
-        "port":        "42863",
-        "nodeRole":    "master",
-        "serviceName": "rpc.statd",
-        "required": false
-    },
-    {
-        "protocol":    "TCP",
-        "port":        "39937",
-        "nodeRole":    "master",
-        "serviceName": "rpc.statd",
-        "required": false
-    },
-    {
-        "protocol":    "TCP",
         "port":        "60000",
         "nodeRole":    "master",
         "serviceName": "crio",
@@ -228,6 +193,76 @@
         "port":        "9447",
         "nodeRole":    "master",
         "serviceName": "crio",
+        "required": true
+    },   
+    {
+        "protocol":    "TCP",
+        "port":        "5051",
+        "nodeRole":    "master",
+        "serviceName": "metal3-state",
+        "required": true
+    },   
+    {
+        "protocol":    "TCP",
+        "port":        "6388",
+        "nodeRole":    "master",
+        "serviceName": "metal3-state",
+        "required": true
+    },   
+    {
+        "protocol":    "TCP",
+        "port":        "22624",
+        "nodeRole":    "master",
+        "serviceName": "machine-config",
+        "required": true
+    },   
+    {
+        "protocol":    "TCP",
+        "port":        "22623",
+        "nodeRole":    "master",
+        "serviceName": "machine-config",
+        "required": true
+    },   
+    {
+        "protocol":    "TCP",
+        "port":        "29445",
+        "nodeRole":    "master",
+        "serviceName": "haproxy",
+        "required": true
+    },   
+    {
+        "protocol":    "TCP",
+        "port":        "9444",
+        "nodeRole":    "master",
+        "serviceName": "haproxy",
+        "required": true
+    },   
+    {
+        "protocol":    "TCP",
+        "port":        "9445",
+        "nodeRole":    "master",
+        "serviceName": "haproxy",
+        "required": true
+    },   
+    {
+        "protocol":    "TCP",
+        "port":        "9258",
+        "nodeRole":    "master",
+        "serviceName": "cluster-control",
+        "required": true
+    },   
+    {
+        "protocol":    "TCP",
+        "port":        "17697",
+        "nodeRole":    "master",
+        "serviceName": "cluster-kube-ap",
+        "required": true
+    },   
+    {
+        "protocol":    "TCP",
+        "port":        "6080",
+        "nodeRole":    "master",
+        "serviceName": "cluster-kube-ap",
         "required": true
     }
 ]
