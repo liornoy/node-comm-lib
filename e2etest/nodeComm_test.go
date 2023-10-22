@@ -92,27 +92,9 @@ var _ = Describe("Comm Matrix", func() {
 	})
 })
 
-func calcMatDiff(m1 commatrix.ComMatrix, m2 commatrix.ComMatrix) []commatrix.ComDetails {
-	diff := []commatrix.ComDetails{}
-	for _, cd1 := range m1.Matrix {
-		found := false
-		for _, cd2 := range m2.Matrix {
-			if cd1.Port == cd2.Port {
-				found = true
-				break
-			}
-		}
-		if !found {
-			diff = append(diff, cd1)
-		}
-	}
-
-	return diff
-}
-
 func printMatDiff(m1 commatrix.ComMatrix, m2 commatrix.ComMatrix) {
-	diffMat1 := calcMatDiff(m1, m2)
-	diffMat2 := calcMatDiff(m2, m1)
+	diffMat1 := m1.Diff(m2)
+	diffMat2 := m2.Diff(m1)
 
 	if len(diffMat1) == 0 && len(diffMat2) == 0 {
 		fmt.Println("matrices are equal")

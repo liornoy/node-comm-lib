@@ -136,6 +136,24 @@ func GetNodesRoles(nodes *corev1.NodeList) map[string]string {
 	return res
 }
 
+func (m ComMatrix) Diff(other ComMatrix) []ComDetails {
+	diff := []ComDetails{}
+	for _, cd1 := range m.Matrix {
+		found := false
+		for _, cd2 := range other.Matrix {
+			if cd1.Port == cd2.Port {
+				found = true
+				break
+			}
+		}
+		if !found {
+			diff = append(diff, cd1)
+		}
+	}
+
+	return diff
+}
+
 func (m ComMatrix) WriteTo(f *os.File) error {
 	sorted := m.Matrix
 	sort.Slice(sorted, func(i, j int) bool {
