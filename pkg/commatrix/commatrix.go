@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/csv"
 	"fmt"
+	"os"
 	"strings"
 
 	corev1 "k8s.io/api/core/v1"
@@ -132,4 +133,15 @@ func GetNodesRoles(nodes *corev1.NodeList) map[string]string {
 	}
 
 	return res
+}
+
+func (m ComMatrix) WriteTo(f *os.File) error {
+	for _, cd := range m.Matrix {
+		_, err := f.Write([]byte(fmt.Sprintln(cd)))
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

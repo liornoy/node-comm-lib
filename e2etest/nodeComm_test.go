@@ -135,7 +135,7 @@ func printArtifacts(ssComMat commatrix.ComMatrix, slicesComMat commatrix.ComMatr
 	}
 
 	defer outfile.Close()
-	err = printComMat(ssComMat, outfile)
+	err = ssComMat.WriteTo(outfile)
 	if err != nil {
 		return err
 	}
@@ -147,20 +147,9 @@ func printArtifacts(ssComMat commatrix.ComMatrix, slicesComMat commatrix.ComMatr
 		return err
 	}
 	defer outfile.Close()
-	err = printComMat(slicesComMat, outfile)
+	err = slicesComMat.WriteTo(outfile)
 	if err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func printComMat(comMat commatrix.ComMatrix, f *os.File) error {
-	for _, cd := range comMat.Matrix {
-		_, err := f.Write([]byte(fmt.Sprintln(cd)))
-		if err != nil {
-			return err
-		}
 	}
 
 	return nil
