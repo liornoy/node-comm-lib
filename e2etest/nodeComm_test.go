@@ -94,9 +94,7 @@ func calcMatDiff(m1 commatrix.ComMatrix, m2 commatrix.ComMatrix) []commatrix.Com
 	for _, cd1 := range m1.Matrix {
 		found := false
 		for _, cd2 := range m2.Matrix {
-			containsServiceName := strings.Contains(cd1.ServiceName, cd2.ServiceName) ||
-				strings.Contains(cd2.ServiceName, cd1.ServiceName)
-			if cd1.Port == cd2.Port && containsServiceName {
+			if cd1.Port == cd2.Port {
 				found = true
 				break
 			}
