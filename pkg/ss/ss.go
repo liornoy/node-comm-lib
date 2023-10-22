@@ -29,20 +29,23 @@ func ToComDetails(ssOutput string, role string, protocol string) []commatrix.Com
 func skipSSline(line, protocol string) bool {
 	fields := strings.Fields(line)
 
-	if strings.Contains(line, "127.0.0") ||
-		(protocol == "TCP" && !strings.Contains(line, "LISTEN")) ||
-		(protocol == "UDP" && !strings.Contains(line, "ESTAB")) ||
-		len(fields) != 6 {
+	shouldSkip := strings.Contains(line, "127.0.0") ||
+		protocol == "TCP" && !strings.Contains(line, "LISTEN") ||
+		protocol == "UDP" && !strings.Contains(line, "ESTAB") ||
+		len(fields) != 6 ||
+		strings.Contains(fields[5], "rpc.statd")
+
+	if shouldSkip {
 		return true
 	}
+
 	return false
 }
 
 func defineComDetail(line string, protocol string, role string) commatrix.ComDetails {
 	optionalProcesses := map[string]bool{
-		"rpc.statd": false,
-		"rpcbind":   false,
-		"sshd":      false,
+		"rpcbind": false,
+		"sshd":    false,
 	}
 	fields := strings.Fields(line)
 	process := getStrBetweenDoubleQuotes(fields[5])
