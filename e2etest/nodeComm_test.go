@@ -78,7 +78,10 @@ var _ = Describe("Comm Matrix", func() {
 			endpointSliceMat, err := commatrix.CreateComMatrix(cs, ingressSlice)
 			Expect(err).ToNot(HaveOccurred())
 
-			err = printArtifacts(expectedComMat, endpointSliceMat)
+			err = writeComMat(expectedComMat, "ss-command-com-matrix.txt")
+			Expect(err).ToNot(HaveOccurred())
+
+			err = writeComMat(endpointSliceMat, "endpointslices-com-matirx.txt")
 			Expect(err).ToNot(HaveOccurred())
 
 			printMatDiff(endpointSliceMat, expectedComMat)
@@ -127,27 +130,15 @@ func printMatDiff(m1 commatrix.ComMatrix, m2 commatrix.ComMatrix) {
 	}
 }
 
-func printArtifacts(ssComMat commatrix.ComMatrix, slicesComMat commatrix.ComMatrix) error {
-	ssComMatPath := path.Join(artifactsPath, "ss-command-com-matrix.txt")
-	outfile, err := os.Create(ssComMatPath)
-	if err != nil {
-		return err
-	}
-
-	defer outfile.Close()
-	err = ssComMat.WriteTo(outfile)
-	if err != nil {
-		return err
-	}
-	outfile.Close()
-
-	slicesComMatPath := path.Join(artifactsPath, "endpointslices-com-matirx.txt")
-	outfile, err = os.Create(slicesComMatPath)
+func writeComMat(m commatrix.ComMatrix, fileName string) error {
+	filePath := path.Join(artifactsPath, fileName)
+	outfile, err := os.Create(filePath)
 	if err != nil {
 		return err
 	}
 	defer outfile.Close()
-	err = slicesComMat.WriteTo(outfile)
+
+	err = m.WriteTo(outfile)
 	if err != nil {
 		return err
 	}
