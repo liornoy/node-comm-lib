@@ -6,6 +6,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"os"
+	"sort"
 	"strings"
 
 	corev1 "k8s.io/api/core/v1"
@@ -136,7 +137,12 @@ func GetNodesRoles(nodes *corev1.NodeList) map[string]string {
 }
 
 func (m ComMatrix) WriteTo(f *os.File) error {
-	for _, cd := range m.Matrix {
+	sorted := m.Matrix
+	sort.Slice(sorted, func(i, j int) bool {
+		return sorted[i].ServiceName < sorted[j].ServiceName
+	})
+
+	for _, cd := range sorted {
 		_, err := f.Write([]byte(fmt.Sprintln(cd)))
 		if err != nil {
 			return err
