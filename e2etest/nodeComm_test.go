@@ -93,21 +93,21 @@ var _ = Describe("Comm Matrix", func() {
 })
 
 func printMatDiff(m1 commatrix.ComMatrix, m2 commatrix.ComMatrix) {
-	diffMat1 := m1.Diff(m2)
-	diffMat2 := m2.Diff(m1)
+	diff1 := m1.Diff(m2)
+	diff2 := m2.Diff(m1)
 
-	if len(diffMat1) == 0 && len(diffMat2) == 0 {
+	if len(diff1.Matrix) == 0 && len(diff2.Matrix) == 0 {
 		fmt.Println("matrices are equal")
 		return
 	}
 
 	fmt.Println("In matrix1 but not in matrix2:")
-	for _, cd := range diffMat1 {
+	for _, cd := range diff1.Matrix {
 		fmt.Printf("%s - %s\n", cd.Port, cd.ServiceName)
 	}
 
 	fmt.Println("\nIn matrix2 but not in matrix1:")
-	for _, cd := range diffMat2 {
+	for _, cd := range diff2.Matrix {
 		fmt.Printf("%s - %s\n", cd.Port, cd.ServiceName)
 	}
 }

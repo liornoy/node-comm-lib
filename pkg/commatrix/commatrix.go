@@ -136,7 +136,7 @@ func GetNodesRoles(nodes *corev1.NodeList) map[string]string {
 	return res
 }
 
-func (m ComMatrix) Diff(other ComMatrix) []ComDetails {
+func (m ComMatrix) Diff(other ComMatrix) ComMatrix {
 	diff := []ComDetails{}
 	for _, cd1 := range m.Matrix {
 		found := false
@@ -151,7 +151,7 @@ func (m ComMatrix) Diff(other ComMatrix) []ComDetails {
 		}
 	}
 
-	return diff
+	return ComMatrix{Matrix: diff}
 }
 
 func (m ComMatrix) WriteTo(f *os.File) error {
