@@ -34,6 +34,15 @@ func (cd ComDetails) String() string {
 	return fmt.Sprintf("%s,%s,%s,%s,%s,%v", cd.Direction, cd.Protocol, cd.Port, cd.NodeRole, cd.ServiceName, cd.Required)
 }
 
+func (m ComMatrix) String() string {
+	var result strings.Builder
+	for _, details := range m.Matrix {
+		result.WriteString(details.String() + "\n")
+	}
+
+	return result.String()
+}
+
 func CreateComMatrix(cs *client.ClientSet, epSlices []discoveryv1.EndpointSlice) (ComMatrix, error) {
 	if len(epSlices) == 0 {
 		return ComMatrix{}, fmt.Errorf("failed to create ComMatrix: epSlices is empty")
