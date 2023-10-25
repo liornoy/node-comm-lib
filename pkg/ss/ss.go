@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"strings"
 
-	"github.com/liornoy/main/node-comm-lib/pkg/commatrix"
+	"github.com/liornoy/node-comm-lib/pkg/commatrix"
 )
 
 func ToComDetails(ssOutput string, role string, protocol string) []commatrix.ComDetails {

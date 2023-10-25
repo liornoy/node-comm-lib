@@ -18,12 +18,12 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/liornoy/main/node-comm-lib/pkg/client"
-	"github.com/liornoy/main/node-comm-lib/pkg/commatrix"
-	"github.com/liornoy/main/node-comm-lib/pkg/consts"
-	"github.com/liornoy/main/node-comm-lib/pkg/endpointslices"
-	"github.com/liornoy/main/node-comm-lib/pkg/pointer"
-	"github.com/liornoy/main/node-comm-lib/pkg/ss"
+	"github.com/liornoy/node-comm-lib/pkg/client"
+	"github.com/liornoy/node-comm-lib/pkg/commatrix"
+	"github.com/liornoy/node-comm-lib/pkg/consts"
+	"github.com/liornoy/node-comm-lib/pkg/endpointslices"
+	"github.com/liornoy/node-comm-lib/pkg/pointer"
+	"github.com/liornoy/node-comm-lib/pkg/ss"
 )
 
 var (

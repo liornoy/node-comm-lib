@@ -8,8 +8,8 @@ import (
 	discoveryv1 "k8s.io/api/discovery/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/liornoy/main/node-comm-lib/pkg/consts"
-	"github.com/liornoy/main/node-comm-lib/pkg/fakeclient"
+	"github.com/liornoy/node-comm-lib/pkg/consts"
+	"github.com/liornoy/node-comm-lib/pkg/fakeclient"
 )
 
 func TestNewQueryNilClient(t *testing.T) {
