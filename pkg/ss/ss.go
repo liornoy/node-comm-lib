@@ -32,29 +32,26 @@ func skipSSline(line, protocol string) bool {
 	shouldSkip := strings.Contains(line, "127.0.0") ||
 		protocol == "TCP" && !strings.Contains(line, "LISTEN") ||
 		protocol == "UDP" && !strings.Contains(line, "ESTAB") ||
-		len(fields) != 6 ||
-		strings.Contains(fields[5], "rpc.statd")
+		len(fields) != 6
 
-	if shouldSkip {
-		return true
-	}
-
-	return false
+	return shouldSkip
 }
 
 func defineComDetail(line string, protocol string, role string) commatrix.ComDetails {
 	optionalProcesses := map[string]bool{
-		"rpcbind": false,
-		"sshd":    false,
+		"rpcbind":   false,
+		"sshd":      false,
+		"rpc.statd": false,
 	}
 	fields := strings.Fields(line)
-	process := getStrBetweenDoubleQuotes(fields[5])
+	processes := getStrBetweenDoubleQuotes(fields[5])
+	mainProcess := processes[0]
 
 	idx := strings.LastIndex(fields[3], ":")
 	port := fields[3][idx+1:]
 
 	required := true
-	if _, ok := optionalProcesses[process]; ok {
+	if _, ok := optionalProcesses[mainProcess]; ok {
 		required = false
 	}
 
@@ -63,16 +60,17 @@ func defineComDetail(line string, protocol string, role string) commatrix.ComDet
 		Protocol:    protocol,
 		Port:        port,
 		NodeRole:    role,
-		ServiceName: process,
+		ServiceName: mainProcess,
 		Required:    required}
 }
 
-func getStrBetweenDoubleQuotes(s string) string {
+func getStrBetweenDoubleQuotes(s string) []string {
 	res := make([]string, 0)
-	for idx, endIdx := 0, 0; strings.Index(s, "\"") != -1; s = s[idx+endIdx+2:] {
+	for idx, endIdx := 0, 0; strings.Contains(s, "\""); s = s[idx+endIdx+2:] {
 		idx = strings.Index(s, "\"")
 		endIdx = strings.Index(s[idx+1:], "\"")
 		res = append(res, s[idx+1:idx+1+endIdx])
 	}
-	return strings.Join(res, ",")
+
+	return res
 }
