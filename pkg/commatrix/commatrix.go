@@ -148,6 +148,9 @@ func GetNodesRoles(nodes *corev1.NodeList) map[string]string {
 func (m ComMatrix) Diff(other ComMatrix) ComMatrix {
 	diff := []ComDetails{}
 	for _, cd1 := range m.Matrix {
+		if !cd1.Required {
+			continue
+		}
 		found := false
 		for _, cd2 := range other.Matrix {
 			if cd1.Port == cd2.Port {
