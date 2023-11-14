@@ -145,10 +145,14 @@ func GetNodesRoles(nodes *corev1.NodeList) map[string]string {
 	return res
 }
 
-func (m ComMatrix) Diff(other ComMatrix) ComMatrix {
+// Diff returns the diff ComMatrix while ignoring entries with ignored ports or that are not required.
+func (m ComMatrix) Diff(other ComMatrix, ignorePorts map[string]bool) ComMatrix {
 	diff := []ComDetails{}
 	for _, cd1 := range m.Matrix {
 		if !cd1.Required {
+			continue
+		}
+		if _, ok := ignorePorts[cd1.Port]; ok {
 			continue
 		}
 		found := false
