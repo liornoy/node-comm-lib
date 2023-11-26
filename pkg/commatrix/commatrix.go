@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/csv"
+	"encoding/json"
 	"fmt"
 	"os"
 	"sort"
@@ -108,6 +109,15 @@ func (m ComMatrix) ToCSV() ([]byte, error) {
 	csvwriter.Flush()
 
 	return w.Bytes(), nil
+}
+
+func (m ComMatrix) ToJSON() ([]byte, error) {
+	out, err := json.Marshal(m.Matrix)
+	if err != nil {
+		return nil, err
+	}
+
+	return out, nil
 }
 
 func RemoveDups(outPuts []ComDetails) []ComDetails {
