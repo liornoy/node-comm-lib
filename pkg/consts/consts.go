@@ -1,8 +1,12 @@
 package consts
 
 const (
-	WorkerRole    = "node-role.kubernetes.io/worker"
-	MasterRole    = "node-role.kubernetes.io/master"
-	IngressLabel  = "ingress"
-	TestNameSpace = "test-node-comm"
+	DefaultAddressType   = "IPv4"
+	IngressLabel         = "ingress"
+	MasterRole           = "node-role.kubernetes.io/master"
+	OptionalLabel        = "optional"
+	OptionalTrue         = "true"
+	PlaceHolderIPAddress = "1.1.1.1"
+	TestNameSpace        = "test-node-comm"
+	WorkerRole           = "node-role.kubernetes.io/worker"
 )
