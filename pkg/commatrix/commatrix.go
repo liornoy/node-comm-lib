@@ -98,7 +98,7 @@ func createComDetails(epSlice discoveryv1.EndpointSlice, nodesRoles map[string]s
 	res := make([]ComDetails, 0)
 
 	required := true
-	if _, ok := epSlice.Labels["optional"]; ok {
+	if _, ok := epSlice.Labels[consts.OptionalLabel]; ok {
 		required = false
 	}
 
