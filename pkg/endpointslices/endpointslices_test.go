@@ -88,7 +88,7 @@ func TestWithLabels(t *testing.T) {
 	var (
 		noLabels      = map[string]string{}
 		oneLabel      = map[string]string{consts.IngressLabel: ""}
-		twoLabels     = map[string]string{consts.IngressLabel: "", "optional": "true"}
+		twoLabels     = map[string]string{consts.IngressLabel: "", consts.OptionalLabel: consts.OptionalTrue}
 		mixedLabels   = map[string]string{consts.IngressLabel: "", "nonexist": ""}
 		nonexistLabel = map[string]string{"nonexist": ""}
 		epSlices      = []discoveryv1.EndpointSlice{
