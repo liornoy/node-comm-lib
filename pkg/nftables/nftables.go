@@ -23,8 +23,13 @@ table ip my_filter {
         # Hard-coded rule to allow SSH traffic for safety
         tcp dport 22 accept;
 		
+		{{if (len .AllowedTCPPorts) gt 0}}
         tcp dport { {{range .AllowedTCPPorts}}{{.}}, {{end}} } accept;
+		{{end}}
+
+		{{if (len .AllowedUDPPorts) gt 0}}
         udp dport { {{range .AllowedUDPPorts}}{{.}}, {{end}} } accept;
+		{{end}}
     }
 }
 `
