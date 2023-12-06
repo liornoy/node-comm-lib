@@ -160,6 +160,7 @@ func RemoveDups(outPuts []ComDetails) []ComDetails {
 	return res
 }
 
+// GetNodesRoles retrieves a list of nodes and returns a mapping of node names to node roles.
 func GetNodesRoles(nodes *corev1.NodeList) map[string]string {
 	res := make(map[string]string)
 
