@@ -1,17 +1,17 @@
 package endpointslices
 
 import (
-	"fmt"
+	corev1 "k8s.io/api/core/v1"
 )
 
-type Filter func(EndpointSliceInfo) (bool, error)
+type Filter func(EndpointSliceInfo) bool
 
-func ApplyFilters(endpointSlicesInfo []EndpointSliceInfo, filters ...Filter) ([]EndpointSliceInfo, error) {
+func ApplyFilters(endpointSlicesInfo []EndpointSliceInfo, filters ...Filter) []EndpointSliceInfo {
 	if len(filters) == 0 {
-		return endpointSlicesInfo, nil
+		return endpointSlicesInfo
 	}
 	if endpointSlicesInfo == nil {
-		return nil, nil
+		return nil
 	}
 
 	filteredEndpointsSlices := make([]EndpointSliceInfo, 0, len(endpointSlicesInfo))
@@ -20,10 +20,7 @@ func ApplyFilters(endpointSlicesInfo []EndpointSliceInfo, filters ...Filter) ([]
 		keep := true
 
 		for _, f := range filters {
-			ret, err := f(epInfo)
-			if err != nil {
-				return nil, fmt.Errorf("failed to filter endpointslice %s/%s, err: %w", epInfo.endpointSlice.Namespace, epInfo.endpointSlice.Name, err)
-			}
+			ret := f(epInfo)
 			if !ret {
 				keep = false
 				break
@@ -35,26 +32,32 @@ func ApplyFilters(endpointSlicesInfo []EndpointSliceInfo, filters ...Filter) ([]
 		}
 	}
 
-	return filteredEndpointsSlices, nil
+	return filteredEndpointsSlices
 }
 
-func FilterForIngressTrafic(endpointslices []EndpointSliceInfo) ([]EndpointSliceInfo, error) {
-	filteredEndpointsSlices, err := ApplyFilters(endpointslices,
+func FilterForIngressTraffic(endpointslices []EndpointSliceInfo) []EndpointSliceInfo {
+	return ApplyFilters(endpointslices,
 		FilterHostNetwork,
-		FilterLabels)
-	if err != nil {
-		return nil, err
-	}
+		FilterServiceTypes)
 
-	return filteredEndpointsSlices, nil
 }
 
 // FilterHostNetwork checks if the pods behind the endpointSlice are host network.
-func FilterHostNetwork(epInfo EndpointSliceInfo) (bool, error) {
-	// We assume all pods for given endpointSlice are either host network or not, so check only the first.
+func FilterHostNetwork(epInfo EndpointSliceInfo) bool {
+	// Assuming all pods in an EndpointSlice are uniformly on host network or not, we only check the first one.
 	if !epInfo.pods[0].Spec.HostNetwork {
-		return false, nil
+		return false
 	}
 
-	return true, nil
+	return true
+}
+
+// FilterServiceTypes checks if the service behind the endpointSlice is of type LoadBalancer or NodePort.
+func FilterServiceTypes(epInfo EndpointSliceInfo) bool {
+	if epInfo.serivce.Spec.Type != corev1.ServiceTypeLoadBalancer &&
+		epInfo.serivce.Spec.Type != corev1.ServiceTypeNodePort {
+		return false
+	}
+
+	return true
 }
